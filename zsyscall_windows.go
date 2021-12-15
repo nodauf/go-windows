@@ -213,6 +213,7 @@ var (
 	procMoveFileExW                                     = modkernel32.NewProc("MoveFileExW")
 	procMoveFileW                                       = modkernel32.NewProc("MoveFileW")
 	procMultiByteToWideChar                             = modkernel32.NewProc("MultiByteToWideChar")
+	procNtUnmapViewOfSection                            = modkernel32.NewProc("NtUnmapViewOfSection")
 	procOpenEventW                                      = modkernel32.NewProc("OpenEventW")
 	procOpenMutexW                                      = modkernel32.NewProc("OpenMutexW")
 	procOpenProcess                                     = modkernel32.NewProc("OpenProcess")
@@ -1738,6 +1739,14 @@ func MultiByteToWideChar(codePage uint32, dwFlags uint32, str *byte, nstr int32,
 	r0, _, e1 := syscall.Syscall6(procMultiByteToWideChar.Addr(), 6, uintptr(codePage), uintptr(dwFlags), uintptr(unsafe.Pointer(str)), uintptr(nstr), uintptr(unsafe.Pointer(wchar)), uintptr(nwchar))
 	nwrite = int32(r0)
 	if nwrite == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func NtUnmapViewOfSection(hProcess uintptr, baseAddress uintptr) (err error) {
+	r1, _, e1 := syscall.Syscall(procNtUnmapViewOfSection.Addr(), 2, uintptr(hProcess), uintptr(baseAddress), 0)
+	if r1 == 0 {
 		err = errnoErr(e1)
 	}
 	return
