@@ -9,9 +9,11 @@ import (
 	"syscall"
 	"unicode/utf16"
 	"unsafe"
+
+	"golang.org/x/sys/windows"
 )
 
-type Handle uintptr
+type Handle = windows.Handle
 type HWND uintptr
 
 const (
