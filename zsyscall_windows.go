@@ -186,6 +186,7 @@ var (
 	procGetSystemTimeAsFileTime                         = modkernel32.NewProc("GetSystemTimeAsFileTime")
 	procGetSystemTimePreciseAsFileTime                  = modkernel32.NewProc("GetSystemTimePreciseAsFileTime")
 	procGetTempPathW                                    = modkernel32.NewProc("GetTempPathW")
+	procGetThreadContext                                = modkernel32.NewProc("GetThreadContext")
 	procGetThreadPreferredUILanguages                   = modkernel32.NewProc("GetThreadPreferredUILanguages")
 	procGetTickCount64                                  = modkernel32.NewProc("GetTickCount64")
 	procGetTimeZoneInformation                          = modkernel32.NewProc("GetTimeZoneInformation")
@@ -255,6 +256,7 @@ var (
 	procSetProcessShutdownParameters                    = modkernel32.NewProc("SetProcessShutdownParameters")
 	procSetProcessWorkingSetSizeEx                      = modkernel32.NewProc("SetProcessWorkingSetSizeEx")
 	procSetStdHandle                                    = modkernel32.NewProc("SetStdHandle")
+	procSetThreadContext                                = modkernel32.NewProc("SetThreadContext")
 	procSetVolumeLabelW                                 = modkernel32.NewProc("SetVolumeLabelW")
 	procSetVolumeMountPointW                            = modkernel32.NewProc("SetVolumeMountPointW")
 	procSizeofResource                                  = modkernel32.NewProc("SizeofResource")
@@ -1490,6 +1492,14 @@ func GetTempPath(buflen uint32, buf *uint16) (n uint32, err error) {
 	return
 }
 
+func GetThreadContext(thread Handle, context *Context) (err error) {
+	r1, _, e1 := syscall.Syscall(procGetThreadContext.Addr(), 2, uintptr(thread), uintptr(unsafe.Pointer(context)), 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func getThreadPreferredUILanguages(flags uint32, numLanguages *uint32, buf *uint16, bufSize *uint32) (err error) {
 	r1, _, e1 := syscall.Syscall6(procGetThreadPreferredUILanguages.Addr(), 4, uintptr(flags), uintptr(unsafe.Pointer(numLanguages)), uintptr(unsafe.Pointer(buf)), uintptr(unsafe.Pointer(bufSize)), 0, 0)
 	if r1 == 0 {
@@ -2114,6 +2124,14 @@ func SetProcessWorkingSetSizeEx(hProcess Handle, dwMinimumWorkingSetSize uintptr
 
 func SetStdHandle(stdhandle uint32, handle Handle) (err error) {
 	r1, _, e1 := syscall.Syscall(procSetStdHandle.Addr(), 2, uintptr(stdhandle), uintptr(handle), 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func SetThreadContext(thread Handle, context *Context) (err error) {
+	r1, _, e1 := syscall.Syscall(procSetThreadContext.Addr(), 2, uintptr(thread), uintptr(unsafe.Pointer(context)), 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}

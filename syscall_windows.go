@@ -329,6 +329,8 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	SetProcessWorkingSetSizeEx(hProcess Handle, dwMinimumWorkingSetSize uintptr, dwMaximumWorkingSetSize uintptr, flags uint32) (err error)
 //sys	GetCommTimeouts(handle Handle, timeouts *CommTimeouts) (err error)
 //sys	SetCommTimeouts(handle Handle, timeouts *CommTimeouts) (err error)
+//sys	GetThreadContext(thread Handle, context *Context) (err error)
+//sys	SetThreadContext(thread Handle, context *Context) (err error)
 
 // Volume Management Functions
 //sys	DefineDosDevice(flags uint32, deviceName *uint16, targetPath *uint16) (err error) = DefineDosDeviceW
