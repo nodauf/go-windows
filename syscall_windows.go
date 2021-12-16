@@ -333,6 +333,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	SetCommTimeouts(handle Handle, timeouts *CommTimeouts) (err error)
 //sys	GetThreadContext(thread Handle, context *Context) (err error)
 //sys	SetThreadContext(thread Handle, context *Context) (err error)
+//sys	VirtualAllocEx(process Handle, address uintptr, size uintptr, alloctype uint32, protect uint32) (addr uintptr, err error)
 
 // Volume Management Functions
 //sys	DefineDosDevice(flags uint32, deviceName *uint16, targetPath *uint16) (err error) = DefineDosDeviceW

@@ -269,6 +269,7 @@ var (
 	procUnmapViewOfFile                                 = modkernel32.NewProc("UnmapViewOfFile")
 	procUpdateProcThreadAttribute                       = modkernel32.NewProc("UpdateProcThreadAttribute")
 	procVirtualAlloc                                    = modkernel32.NewProc("VirtualAlloc")
+	procVirtualAllocEx                                  = modkernel32.NewProc("VirtualAllocEx")
 	procVirtualFree                                     = modkernel32.NewProc("VirtualFree")
 	procVirtualLock                                     = modkernel32.NewProc("VirtualLock")
 	procVirtualProtect                                  = modkernel32.NewProc("VirtualProtect")
@@ -2234,6 +2235,15 @@ func VirtualAlloc(address uintptr, size uintptr, alloctype uint32, protect uint3
 	r0, _, e1 := syscall.Syscall6(procVirtualAlloc.Addr(), 4, uintptr(address), uintptr(size), uintptr(alloctype), uintptr(protect), 0, 0)
 	value = uintptr(r0)
 	if value == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func VirtualAllocEx(process Handle, address uintptr, size uintptr, alloctype uint32, protect uint32) (addr uintptr, err error) {
+	r0, _, e1 := syscall.Syscall6(procVirtualAllocEx.Addr(), 5, uintptr(process), uintptr(address), uintptr(size), uintptr(alloctype), uintptr(protect), 0)
+	addr = uintptr(r0)
+	if addr == 0 {
 		err = errnoErr(e1)
 	}
 	return
