@@ -2422,9 +2422,11 @@ func NtSetSystemInformation(sysInfoClass int32, sysInfo unsafe.Pointer, sysInfoL
 	return
 }
 
-func NtUnmapViewOfSection(process Handle, baseAddress uintptr) (ret bool) {
+func NtUnmapViewOfSection(process Handle, baseAddress uintptr) (ntstatus error) {
 	r0, _, _ := syscall.Syscall(procNtUnmapViewOfSection.Addr(), 2, uintptr(process), uintptr(baseAddress), 0)
-	ret = r0 != 0
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
+	}
 	return
 }
 
