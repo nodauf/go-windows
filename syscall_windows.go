@@ -333,7 +333,6 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	SetCommTimeouts(handle Handle, timeouts *CommTimeouts) (err error)
 //sys	GetThreadContext(thread Handle, context *Context) (err error)
 //sys	SetThreadContext(thread Handle, context *Context) (err error)
-//sys	NtUnmapViewOfSection(hProcess uintptr, baseAddress uintptr) (err error)
 
 // Volume Management Functions
 //sys	DefineDosDevice(flags uint32, deviceName *uint16, targetPath *uint16) (err error) = DefineDosDeviceW
@@ -407,6 +406,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	NtSetSystemInformation(sysInfoClass int32, sysInfo unsafe.Pointer, sysInfoLen uint32) (ntstatus error) = ntdll.NtSetSystemInformation
 //sys	RtlAddFunctionTable(functionTable *RUNTIME_FUNCTION, entryCount uint32, baseAddress uintptr) (ret bool) = ntdll.RtlAddFunctionTable
 //sys	RtlDeleteFunctionTable(functionTable *RUNTIME_FUNCTION) (ret bool) = ntdll.RtlDeleteFunctionTable
+//sys	NtUnmapViewOfSection(process Handle, baseAddress uintptr) (ret bool) = ntdll.NtUnmapViewOfSection
 
 // syscall interface implementation for other packages
 

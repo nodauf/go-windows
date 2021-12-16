@@ -213,7 +213,6 @@ var (
 	procMoveFileExW                                     = modkernel32.NewProc("MoveFileExW")
 	procMoveFileW                                       = modkernel32.NewProc("MoveFileW")
 	procMultiByteToWideChar                             = modkernel32.NewProc("MultiByteToWideChar")
-	procNtUnmapViewOfSection                            = modkernel32.NewProc("NtUnmapViewOfSection")
 	procOpenEventW                                      = modkernel32.NewProc("OpenEventW")
 	procOpenMutexW                                      = modkernel32.NewProc("OpenMutexW")
 	procOpenProcess                                     = modkernel32.NewProc("OpenProcess")
@@ -292,6 +291,7 @@ var (
 	procNtSetInformationFile                            = modntdll.NewProc("NtSetInformationFile")
 	procNtSetInformationProcess                         = modntdll.NewProc("NtSetInformationProcess")
 	procNtSetSystemInformation                          = modntdll.NewProc("NtSetSystemInformation")
+	procNtUnmapViewOfSection                            = modntdll.NewProc("NtUnmapViewOfSection")
 	procRtlAddFunctionTable                             = modntdll.NewProc("RtlAddFunctionTable")
 	procRtlDefaultNpAcl                                 = modntdll.NewProc("RtlDefaultNpAcl")
 	procRtlDeleteFunctionTable                          = modntdll.NewProc("RtlDeleteFunctionTable")
@@ -1744,14 +1744,6 @@ func MultiByteToWideChar(codePage uint32, dwFlags uint32, str *byte, nstr int32,
 	return
 }
 
-func NtUnmapViewOfSection(hProcess uintptr, baseAddress uintptr) (err error) {
-	r1, _, e1 := syscall.Syscall(procNtUnmapViewOfSection.Addr(), 2, uintptr(hProcess), uintptr(baseAddress), 0)
-	if r1 == 0 {
-		err = errnoErr(e1)
-	}
-	return
-}
-
 func OpenEvent(desiredAccess uint32, inheritHandle bool, name *uint16) (handle Handle, err error) {
 	var _p0 uint32
 	if inheritHandle {
@@ -2427,6 +2419,12 @@ func NtSetSystemInformation(sysInfoClass int32, sysInfo unsafe.Pointer, sysInfoL
 	if r0 != 0 {
 		ntstatus = windows.NTStatus(r0)
 	}
+	return
+}
+
+func NtUnmapViewOfSection(process Handle, baseAddress uintptr) (ret bool) {
+	r0, _, _ := syscall.Syscall(procNtUnmapViewOfSection.Addr(), 2, uintptr(process), uintptr(baseAddress), 0)
+	ret = r0 != 0
 	return
 }
 
