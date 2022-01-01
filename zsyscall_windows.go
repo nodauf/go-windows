@@ -225,6 +225,7 @@ var (
 	procQueryDosDeviceW                                 = modkernel32.NewProc("QueryDosDeviceW")
 	procQueryFullProcessImageNameW                      = modkernel32.NewProc("QueryFullProcessImageNameW")
 	procQueryInformationJobObject                       = modkernel32.NewProc("QueryInformationJobObject")
+	procQueueUserAPC                                    = modkernel32.NewProc("QueueUserAPC")
 	procReadConsoleW                                    = modkernel32.NewProc("ReadConsoleW")
 	procReadDirectoryChangesW                           = modkernel32.NewProc("ReadDirectoryChangesW")
 	procReadFile                                        = modkernel32.NewProc("ReadFile")
@@ -1856,6 +1857,14 @@ func QueryFullProcessImageName(proc Handle, flags uint32, exeName *uint16, size 
 
 func QueryInformationJobObject(job Handle, JobObjectInformationClass int32, JobObjectInformation uintptr, JobObjectInformationLength uint32, retlen *uint32) (err error) {
 	r1, _, e1 := syscall.Syscall6(procQueryInformationJobObject.Addr(), 5, uintptr(job), uintptr(JobObjectInformationClass), uintptr(JobObjectInformation), uintptr(JobObjectInformationLength), uintptr(unsafe.Pointer(retlen)), 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func QueueUserAPC(address uintptr, thread Handle, dwData uintptr) (err error) {
+	r1, _, e1 := syscall.Syscall(procQueueUserAPC.Addr(), 3, uintptr(address), uintptr(thread), uintptr(dwData))
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
