@@ -935,7 +935,20 @@ type StartupInfoEx struct {
 // it with ProcThreadAttributeListContainer.Update, free its memory using
 // ProcThreadAttributeListContainer.Delete, and access the list itself using
 // ProcThreadAttributeListContainer.List.
-type ProcThreadAttributeList struct{}
+type ProcThreadAttributeList struct{
+	dwFlags  uint32
+	size     uint64
+	count    uint64
+	reserved uint64
+	unknown  *uint64
+	entries  []*ProcThreadAttributeEntry
+}
+
+type ProcThreadAttributeEntry struct {
+	attribute *uint32
+	cbSize    uintptr
+	lpValue   uintptr
+}
 
 type ProcThreadAttributeListContainer struct {
 	data     *ProcThreadAttributeList
