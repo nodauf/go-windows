@@ -244,9 +244,9 @@ const (
 	PROC_THREAD_ATTRIBUTE_UMS_THREAD        = 0x00030006
 	PROC_THREAD_ATTRIBUTE_PROTECTION_LEVEL  = 0x0002000b
 
-    // value for those attribute
-    PROCESS_CREATION_MITIGATION_POLICY_BLOCK_NON_MICROSOFT_BINARIES_ALWAYS_ON = 0x100000000000
-    PROCESS_CREATION_MITIGATION_POLICY_PROHIBIT_DYNAMIC_CODE_ALWAYS_ON = 0x1000000000
+	// value for those attribute
+	PROCESS_CREATION_MITIGATION_POLICY_BLOCK_NON_MICROSOFT_BINARIES_ALWAYS_ON = 0x100000000000
+	PROCESS_CREATION_MITIGATION_POLICY_PROHIBIT_DYNAMIC_CODE_ALWAYS_ON        = 0x1000000000
 )
 
 const (
@@ -939,7 +939,7 @@ type StartupInfoEx struct {
 // it with ProcThreadAttributeListContainer.Update, free its memory using
 // ProcThreadAttributeListContainer.Delete, and access the list itself using
 // ProcThreadAttributeListContainer.List.
-type ProcThreadAttributeList struct{
+type ProcThreadAttributeList struct {
 	dwFlags  uint32
 	size     uint64
 	count    uint64
