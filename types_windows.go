@@ -929,6 +929,16 @@ type StartupInfoEx struct {
 	ProcThreadAttributeList *ProcThreadAttributeList
 }
 
+const (
+    // Attributes for UpdateProcThreadAttribute
+    PROC_THREAD_ATTRIBUTE_MITIGATION_POLICY = 0x20007
+
+    // Attributes values for UpdateProcThreadAttribute
+    PROCESS_CREATION_MITIGATION_POLICY_BLOCK_NON_MICROSOFT_BINARIES_ALWAYS_ON = 0x100000000000
+    PROCESS_CREATION_MITIGATION_POLICY_PROHIBIT_DYNAMIC_CODE_ALWAYS_ON = 0x1000000000
+    
+)
+
 // ProcThreadAttributeList is a placeholder type to represent a PROC_THREAD_ATTRIBUTE_LIST.
 //
 // To create a *ProcThreadAttributeList, use NewProcThreadAttributeList, update
