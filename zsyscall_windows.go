@@ -173,6 +173,7 @@ var (
 	procGetOverlappedResult                             = modkernel32.NewProc("GetOverlappedResult")
 	procGetPriorityClass                                = modkernel32.NewProc("GetPriorityClass")
 	procGetProcAddress                                  = modkernel32.NewProc("GetProcAddress")
+	procGetProcessHeap                                  = modkernel32.NewProc("GetProcessHeap")
 	procGetProcessId                                    = modkernel32.NewProc("GetProcessId")
 	procGetProcessPreferredUILanguages                  = modkernel32.NewProc("GetProcessPreferredUILanguages")
 	procGetProcessShutdownParameters                    = modkernel32.NewProc("GetProcessShutdownParameters")
@@ -197,6 +198,8 @@ var (
 	procGetVolumeNameForVolumeMountPointW               = modkernel32.NewProc("GetVolumeNameForVolumeMountPointW")
 	procGetVolumePathNameW                              = modkernel32.NewProc("GetVolumePathNameW")
 	procGetVolumePathNamesForVolumeNameW                = modkernel32.NewProc("GetVolumePathNamesForVolumeNameW")
+	procHeapAlloc                                       = modkernel32.NewProc("HeapAlloc")
+	procHeapFree                                        = modkernel32.NewProc("HeapFree")
 	procInitializeProcThreadAttributeList               = modkernel32.NewProc("InitializeProcThreadAttributeList")
 	procIsWow64Process                                  = modkernel32.NewProc("IsWow64Process")
 	procIsWow64Process2                                 = modkernel32.NewProc("IsWow64Process2")
@@ -1396,6 +1399,15 @@ func _GetProcAddress(module Handle, procname *byte) (proc uintptr, err error) {
 	return
 }
 
+func GetProcessHeap() (procHeap windows.Handle, err error) {
+	r0, _, e1 := syscall.Syscall(procGetProcessHeap.Addr(), 0, 0, 0, 0)
+	procHeap = windows.Handle(r0)
+	if procHeap == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func GetProcessId(process Handle) (id uint32, err error) {
 	r0, _, e1 := syscall.Syscall(procGetProcessId.Addr(), 1, uintptr(process), 0, 0)
 	id = uint32(r0)
@@ -1577,6 +1589,23 @@ func GetVolumePathName(fileName *uint16, volumePathName *uint16, bufferLength ui
 
 func GetVolumePathNamesForVolumeName(volumeName *uint16, volumePathNames *uint16, bufferLength uint32, returnLength *uint32) (err error) {
 	r1, _, e1 := syscall.Syscall6(procGetVolumePathNamesForVolumeNameW.Addr(), 4, uintptr(unsafe.Pointer(volumeName)), uintptr(unsafe.Pointer(volumePathNames)), uintptr(bufferLength), uintptr(unsafe.Pointer(returnLength)), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func HeapAlloc(hHeap Handle, dwFlags uint32, dwBytes uintptr) (lpMem uintptr, err error) {
+	r0, _, e1 := syscall.Syscall(procHeapAlloc.Addr(), 3, uintptr(hHeap), uintptr(dwFlags), uintptr(dwBytes))
+	lpMem = uintptr(r0)
+	if lpMem == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func HeapFree(hHeap Handle, dwFlags uint32, lpMem uintptr) (err error) {
+	r1, _, e1 := syscall.Syscall(procHeapFree.Addr(), 3, uintptr(hHeap), uintptr(dwFlags), uintptr(lpMem))
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}

@@ -335,6 +335,9 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	SetThreadContext(thread Handle, context *Context) (err error)
 //sys	VirtualAllocEx(process Handle, address uintptr, size uintptr, alloctype uint32, protect uint32) (addr uintptr, err error)
 //sys   QueueUserAPC(address uintptr, thread Handle, dwData uintptr) (err error)
+//sys   GetProcessHeap() (procHeap windows.Handle, err error)
+//sys   HeapAlloc(hHeap Handle, dwFlags uint32, dwBytes uintptr) (lpMem uintptr, err error)
+//sys   HeapFree(hHeap Handle, dwFlags uint32, lpMem uintptr) (err error)
 
 // Volume Management Functions
 //sys	DefineDosDevice(flags uint32, deviceName *uint16, targetPath *uint16) (err error) = DefineDosDeviceW
