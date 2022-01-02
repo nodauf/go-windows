@@ -894,7 +894,7 @@ func DeleteFile(path *uint16) (err error) {
 	return
 }
 
-func deleteProcThreadAttributeList(attrlist *ProcThreadAttributeList) {
+func DeleteProcThreadAttributeList(attrlist *ProcThreadAttributeList) {
 	syscall.Syscall(procDeleteProcThreadAttributeList.Addr(), 1, uintptr(unsafe.Pointer(attrlist)), 0, 0)
 	return
 }
@@ -1583,7 +1583,7 @@ func GetVolumePathNamesForVolumeName(volumeName *uint16, volumePathNames *uint16
 	return
 }
 
-func initializeProcThreadAttributeList(attrlist *ProcThreadAttributeList, attrcount uint32, flags uint32, size *uintptr) (err error) {
+func InitializeProcThreadAttributeList(attrlist *ProcThreadAttributeList, attrcount uint32, flags uint32, size *uintptr) (err error) {
 	r1, _, e1 := syscall.Syscall6(procInitializeProcThreadAttributeList.Addr(), 4, uintptr(unsafe.Pointer(attrlist)), uintptr(attrcount), uintptr(flags), uintptr(unsafe.Pointer(size)), 0, 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
@@ -2232,16 +2232,8 @@ func UnmapViewOfFile(addr uintptr) (err error) {
 	return
 }
 
-func updateProcThreadAttribute(attrlist *ProcThreadAttributeList, flags uint32, attr uintptr, value unsafe.Pointer, size uintptr, prevvalue unsafe.Pointer, returnedsize *uintptr) (err error) {
+func UpdateProcThreadAttribute(attrlist *ProcThreadAttributeList, flags uint32, attr uintptr, value unsafe.Pointer, size uintptr, prevvalue unsafe.Pointer, returnedsize *uintptr) (err error) {
 	r1, _, e1 := syscall.Syscall9(procUpdateProcThreadAttribute.Addr(), 7, uintptr(unsafe.Pointer(attrlist)), uintptr(flags), uintptr(attr), uintptr(value), uintptr(size), uintptr(prevvalue), uintptr(unsafe.Pointer(returnedsize)), 0, 0)
-	if r1 == 0 {
-		err = errnoErr(e1)
-	}
-	return
-}
-
-func UpdateProcThreadAttribute(lpAttributeList *ProcThreadAttributeList, dwFlags uint32, attribute uintptr, lpValue *uintptr, cbSize uintptr, lpPreviousValue uintptr, lpReturnSize *uintptr) (err error) {
-	r1, _, e1 := syscall.Syscall9(procUpdateProcThreadAttribute.Addr(), 7, uintptr(unsafe.Pointer(lpAttributeList)), uintptr(dwFlags), uintptr(attribute), uintptr(unsafe.Pointer(lpValue)), uintptr(cbSize), uintptr(lpPreviousValue), uintptr(unsafe.Pointer(lpReturnSize)), 0, 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
