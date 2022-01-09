@@ -216,6 +216,7 @@ var (
 	procMoveFileExW                                     = modkernel32.NewProc("MoveFileExW")
 	procMoveFileW                                       = modkernel32.NewProc("MoveFileW")
 	procMultiByteToWideChar                             = modkernel32.NewProc("MultiByteToWideChar")
+	procNtWriteFile                                     = modkernel32.NewProc("NtWriteFile")
 	procOpenEventW                                      = modkernel32.NewProc("OpenEventW")
 	procOpenMutexW                                      = modkernel32.NewProc("OpenMutexW")
 	procOpenProcess                                     = modkernel32.NewProc("OpenProcess")
@@ -1771,6 +1772,14 @@ func MultiByteToWideChar(codePage uint32, dwFlags uint32, str *byte, nstr int32,
 	nwrite = int32(r0)
 	if nwrite == 0 {
 		err = errnoErr(e1)
+	}
+	return
+}
+
+func NtWriteFile(FileHandle Handle, Event Handle, reserved *uintptr, reserved2 *byte, IoStatusBlock *IO_STATUS_BLOCK, Buffer *byte, Length uint32, ByteOffset *int64, Key *uint32) (ntstatus error) {
+	r0, _, _ := syscall.Syscall9(procNtWriteFile.Addr(), 9, uintptr(FileHandle), uintptr(Event), uintptr(unsafe.Pointer(reserved)), uintptr(unsafe.Pointer(reserved2)), uintptr(unsafe.Pointer(IoStatusBlock)), uintptr(unsafe.Pointer(Buffer)), uintptr(Length), uintptr(unsafe.Pointer(ByteOffset)), uintptr(unsafe.Pointer(Key)))
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
 	}
 	return
 }

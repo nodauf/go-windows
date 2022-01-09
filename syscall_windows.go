@@ -412,6 +412,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	RtlAddFunctionTable(functionTable *RUNTIME_FUNCTION, entryCount uint32, baseAddress uintptr) (ret bool) = ntdll.RtlAddFunctionTable
 //sys	RtlDeleteFunctionTable(functionTable *RUNTIME_FUNCTION) (ret bool) = ntdll.RtlDeleteFunctionTable
 //sys	NtUnmapViewOfSection(process Handle, baseAddress uintptr) (ntstatus error) = ntdll.NtUnmapViewOfSection
+//sys	NtWriteFile(FileHandle Handle, Event Handle, reserved *uintptr, reserved2 *byte, IoStatusBlock *IO_STATUS_BLOCK, Buffer *byte, Length uint32, ByteOffset *int64, Key *uint32) (ntstatus error)
 
 // syscall interface implementation for other packages
 
