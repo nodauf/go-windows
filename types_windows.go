@@ -2650,6 +2650,10 @@ const (
 	FILE_LINK_FORCE_RESIZE_SR                      = 0x00000180
 )
 
+type FILE_DISPOSITION_INFORMATION_EX struct {
+	Flags uint32
+}
+
 // ProcessInformationClasses for NtQueryInformationProcess and NtSetInformationProcess.
 const (
 	ProcessBasicInformation = iota
