@@ -540,6 +540,11 @@ const (
 	GENERIC_WRITE            = 0x40000000
 	GENERIC_EXECUTE          = 0x20000000
 	GENERIC_ALL              = 0x10000000
+	SEC_COMMIT               = 0x8000000
+	SECTION_WRITE            = 0x2
+	SECTION_READ             = 0x4
+	SECTION_EXECUTE          = 0x8
+	SECTION_ALL              = 0x1 | SECTION_READ | SECTION_WRITE | SECTION_EXECUTE | 0x10 | 0xf0000
 )
 
 type ACCESS_MODE uint32
