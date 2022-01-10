@@ -216,6 +216,7 @@ var (
 	procMoveFileExW                                     = modkernel32.NewProc("MoveFileExW")
 	procMoveFileW                                       = modkernel32.NewProc("MoveFileW")
 	procMultiByteToWideChar                             = modkernel32.NewProc("MultiByteToWideChar")
+	procNtClose                                         = modkernel32.NewProc("NtClose")
 	procNtCreateSection                                 = modkernel32.NewProc("NtCreateSection")
 	procNtWriteFile                                     = modkernel32.NewProc("NtWriteFile")
 	procOpenEventW                                      = modkernel32.NewProc("OpenEventW")
@@ -1777,16 +1778,24 @@ func MultiByteToWideChar(codePage uint32, dwFlags uint32, str *byte, nstr int32,
 	return
 }
 
-func NtCreateSection(SectionHandle *Handle, DesiredAccess ACCESS_MASK, ObjectAttributes *OBJECT_ATTRIBUTES, MaximumSize *int64, SectionPageProtection uint32, AllocationAttributes uint32, FileHandle Handle) (ntstatus error) {
-	r0, _, _ := syscall.Syscall9(procNtCreateSection.Addr(), 7, uintptr(unsafe.Pointer(SectionHandle)), uintptr(DesiredAccess), uintptr(unsafe.Pointer(ObjectAttributes)), uintptr(unsafe.Pointer(MaximumSize)), uintptr(SectionPageProtection), uintptr(AllocationAttributes), uintptr(FileHandle), 0, 0)
+func NtClose(handle Handle) (ntstatus error) {
+	r0, _, _ := syscall.Syscall(procNtClose.Addr(), 1, uintptr(handle), 0, 0)
 	if r0 != 0 {
 		ntstatus = windows.NTStatus(r0)
 	}
 	return
 }
 
-func NtWriteFile(FileHandle Handle, Event Handle, reserved *uintptr, reserved2 *byte, IoStatusBlock *IO_STATUS_BLOCK, Buffer *byte, Length uint32, ByteOffset *int64, Key *uint32) (ntstatus error) {
-	r0, _, _ := syscall.Syscall9(procNtWriteFile.Addr(), 9, uintptr(FileHandle), uintptr(Event), uintptr(unsafe.Pointer(reserved)), uintptr(unsafe.Pointer(reserved2)), uintptr(unsafe.Pointer(IoStatusBlock)), uintptr(unsafe.Pointer(Buffer)), uintptr(Length), uintptr(unsafe.Pointer(ByteOffset)), uintptr(unsafe.Pointer(Key)))
+func NtCreateSection(sectionHandle *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, maximumSize *int64, sectionPageProtection uint32, allocationAttributes uint32, fileHandle Handle) (ntstatus error) {
+	r0, _, _ := syscall.Syscall9(procNtCreateSection.Addr(), 7, uintptr(unsafe.Pointer(sectionHandle)), uintptr(desiredAccess), uintptr(unsafe.Pointer(objectAttributes)), uintptr(unsafe.Pointer(maximumSize)), uintptr(sectionPageProtection), uintptr(allocationAttributes), uintptr(fileHandle), 0, 0)
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
+	}
+	return
+}
+
+func NtWriteFile(fileHandle Handle, event Handle, reserved *uintptr, reserved2 *byte, ioStatusBlock *IO_STATUS_BLOCK, buffer *byte, length uint32, byteOffset *int64, key *uint32) (ntstatus error) {
+	r0, _, _ := syscall.Syscall9(procNtWriteFile.Addr(), 9, uintptr(fileHandle), uintptr(event), uintptr(unsafe.Pointer(reserved)), uintptr(unsafe.Pointer(reserved2)), uintptr(unsafe.Pointer(ioStatusBlock)), uintptr(unsafe.Pointer(buffer)), uintptr(length), uintptr(unsafe.Pointer(byteOffset)), uintptr(unsafe.Pointer(key)))
 	if r0 != 0 {
 		ntstatus = windows.NTStatus(r0)
 	}
