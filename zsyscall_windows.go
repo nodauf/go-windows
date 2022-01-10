@@ -216,6 +216,7 @@ var (
 	procMoveFileExW                                     = modkernel32.NewProc("MoveFileExW")
 	procMoveFileW                                       = modkernel32.NewProc("MoveFileW")
 	procMultiByteToWideChar                             = modkernel32.NewProc("MultiByteToWideChar")
+	procNtCreateSection                                 = modkernel32.NewProc("NtCreateSection")
 	procNtWriteFile                                     = modkernel32.NewProc("NtWriteFile")
 	procOpenEventW                                      = modkernel32.NewProc("OpenEventW")
 	procOpenMutexW                                      = modkernel32.NewProc("OpenMutexW")
@@ -1772,6 +1773,14 @@ func MultiByteToWideChar(codePage uint32, dwFlags uint32, str *byte, nstr int32,
 	nwrite = int32(r0)
 	if nwrite == 0 {
 		err = errnoErr(e1)
+	}
+	return
+}
+
+func NtCreateSection(SectionHandle *Handle, DesiredAccess ACCESS_MASK, ObjectAttributes *OBJECT_ATTRIBUTES, MaximumSize *int64, SectionPageProtection uint32, AllocationAttributes uint32, FileHandle Handle) (ntstatus error) {
+	r0, _, _ := syscall.Syscall9(procNtCreateSection.Addr(), 7, uintptr(unsafe.Pointer(SectionHandle)), uintptr(DesiredAccess), uintptr(unsafe.Pointer(ObjectAttributes)), uintptr(unsafe.Pointer(MaximumSize)), uintptr(SectionPageProtection), uintptr(AllocationAttributes), uintptr(FileHandle), 0, 0)
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
 	}
 	return
 }
