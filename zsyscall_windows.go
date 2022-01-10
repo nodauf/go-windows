@@ -217,6 +217,7 @@ var (
 	procMoveFileW                                       = modkernel32.NewProc("MoveFileW")
 	procMultiByteToWideChar                             = modkernel32.NewProc("MultiByteToWideChar")
 	procNtClose                                         = modkernel32.NewProc("NtClose")
+	procNtCreateProcess                                 = modkernel32.NewProc("NtCreateProcess")
 	procNtCreateSection                                 = modkernel32.NewProc("NtCreateSection")
 	procNtWriteFile                                     = modkernel32.NewProc("NtWriteFile")
 	procOpenEventW                                      = modkernel32.NewProc("OpenEventW")
@@ -1780,6 +1781,18 @@ func MultiByteToWideChar(codePage uint32, dwFlags uint32, str *byte, nstr int32,
 
 func NtClose(handle Handle) (ntstatus error) {
 	r0, _, _ := syscall.Syscall(procNtClose.Addr(), 1, uintptr(handle), 0, 0)
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
+	}
+	return
+}
+
+func NtCreateProcess(processHandle *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, parentProcess Handle, inheritObjectTable bool, sectionHandle Handle, debugPort Handle, exceptionPort Handle) (ntstatus error) {
+	var _p0 uint32
+	if inheritObjectTable {
+		_p0 = 1
+	}
+	r0, _, _ := syscall.Syscall9(procNtCreateProcess.Addr(), 8, uintptr(unsafe.Pointer(processHandle)), uintptr(desiredAccess), uintptr(unsafe.Pointer(objectAttributes)), uintptr(parentProcess), uintptr(_p0), uintptr(sectionHandle), uintptr(debugPort), uintptr(exceptionPort), 0)
 	if r0 != 0 {
 		ntstatus = windows.NTStatus(r0)
 	}
