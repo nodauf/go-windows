@@ -415,7 +415,9 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	NtWriteFile(fileHandle Handle, event Handle, reserved *uintptr, reserved2 *byte, ioStatusBlock *IO_STATUS_BLOCK, buffer *byte, length uint32, byteOffset *int64, key *uint32) (ntstatus error)
 //sys   NtCreateSection(sectionHandle *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, maximumSize *int64, sectionPageProtection uint32, allocationAttributes uint32, fileHandle Handle) (ntstatus error)
 //sys	NtClose(handle Handle) (ntstatus error)
-//sys	NtCreateProcess(processHandle *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, parentProcess Handle, inheritObjectTable bool, sectionHandle Handle, debugPort Handle, exceptionPort Handle) (ntstatus error)
+//sys	NtCreateProcess(process *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, parentProcess Handle, inheritObjectTable bool, sectionHandle Handle, debugPort Handle, exceptionPort Handle) (ntstatus error)
+//sys	NtReadVirtualMemory(process Handle, baseAddress uintptr, buffer *byte, size uintptr, numberOfBytesRead *uintptr) (ntstatus error)
+
 // syscall interface implementation for other packages
 
 // GetCurrentProcess returns the handle for the current process.

@@ -219,6 +219,7 @@ var (
 	procNtClose                                         = modkernel32.NewProc("NtClose")
 	procNtCreateProcess                                 = modkernel32.NewProc("NtCreateProcess")
 	procNtCreateSection                                 = modkernel32.NewProc("NtCreateSection")
+	procNtReadVirtualMemory                             = modkernel32.NewProc("NtReadVirtualMemory")
 	procNtWriteFile                                     = modkernel32.NewProc("NtWriteFile")
 	procOpenEventW                                      = modkernel32.NewProc("OpenEventW")
 	procOpenMutexW                                      = modkernel32.NewProc("OpenMutexW")
@@ -1787,12 +1788,12 @@ func NtClose(handle Handle) (ntstatus error) {
 	return
 }
 
-func NtCreateProcess(processHandle *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, parentProcess Handle, inheritObjectTable bool, sectionHandle Handle, debugPort Handle, exceptionPort Handle) (ntstatus error) {
+func NtCreateProcess(process *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, parentProcess Handle, inheritObjectTable bool, sectionHandle Handle, debugPort Handle, exceptionPort Handle) (ntstatus error) {
 	var _p0 uint32
 	if inheritObjectTable {
 		_p0 = 1
 	}
-	r0, _, _ := syscall.Syscall9(procNtCreateProcess.Addr(), 8, uintptr(unsafe.Pointer(processHandle)), uintptr(desiredAccess), uintptr(unsafe.Pointer(objectAttributes)), uintptr(parentProcess), uintptr(_p0), uintptr(sectionHandle), uintptr(debugPort), uintptr(exceptionPort), 0)
+	r0, _, _ := syscall.Syscall9(procNtCreateProcess.Addr(), 8, uintptr(unsafe.Pointer(process)), uintptr(desiredAccess), uintptr(unsafe.Pointer(objectAttributes)), uintptr(parentProcess), uintptr(_p0), uintptr(sectionHandle), uintptr(debugPort), uintptr(exceptionPort), 0)
 	if r0 != 0 {
 		ntstatus = windows.NTStatus(r0)
 	}
@@ -1801,6 +1802,14 @@ func NtCreateProcess(processHandle *Handle, desiredAccess ACCESS_MASK, objectAtt
 
 func NtCreateSection(sectionHandle *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, maximumSize *int64, sectionPageProtection uint32, allocationAttributes uint32, fileHandle Handle) (ntstatus error) {
 	r0, _, _ := syscall.Syscall9(procNtCreateSection.Addr(), 7, uintptr(unsafe.Pointer(sectionHandle)), uintptr(desiredAccess), uintptr(unsafe.Pointer(objectAttributes)), uintptr(unsafe.Pointer(maximumSize)), uintptr(sectionPageProtection), uintptr(allocationAttributes), uintptr(fileHandle), 0, 0)
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
+	}
+	return
+}
+
+func NtReadVirtualMemory(process Handle, baseAddress uintptr, buffer *byte, size uintptr, numberOfBytesRead *uintptr) (ntstatus error) {
+	r0, _, _ := syscall.Syscall6(procNtReadVirtualMemory.Addr(), 5, uintptr(process), uintptr(baseAddress), uintptr(unsafe.Pointer(buffer)), uintptr(size), uintptr(unsafe.Pointer(numberOfBytesRead)), 0)
 	if r0 != 0 {
 		ntstatus = windows.NTStatus(r0)
 	}
