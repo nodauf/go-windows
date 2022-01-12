@@ -412,11 +412,11 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	RtlAddFunctionTable(functionTable *RUNTIME_FUNCTION, entryCount uint32, baseAddress uintptr) (ret bool) = ntdll.RtlAddFunctionTable
 //sys	RtlDeleteFunctionTable(functionTable *RUNTIME_FUNCTION) (ret bool) = ntdll.RtlDeleteFunctionTable
 //sys	NtUnmapViewOfSection(process Handle, baseAddress uintptr) (ntstatus error) = ntdll.NtUnmapViewOfSection
-//sys	NtWriteFile(fileHandle Handle, event Handle, reserved *uintptr, reserved2 *byte, ioStatusBlock *IO_STATUS_BLOCK, buffer *byte, length uint32, byteOffset *int64, key *uint32) (ntstatus error)
-//sys   NtCreateSection(sectionHandle *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, maximumSize *int64, sectionPageProtection uint32, allocationAttributes uint32, fileHandle Handle) (ntstatus error)
-//sys	NtClose(handle Handle) (ntstatus error)
-//sys	NtCreateProcess(process *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, parentProcess Handle, inheritObjectTable bool, sectionHandle Handle, debugPort Handle, exceptionPort Handle) (ntstatus error)
-//sys	NtReadVirtualMemory(process Handle, baseAddress uintptr, buffer *byte, size uintptr, numberOfBytesRead *uintptr) (ntstatus error)
+//sys	NtWriteFile(fileHandle Handle, event Handle, reserved *uintptr, reserved2 *byte, ioStatusBlock *IO_STATUS_BLOCK, buffer *byte, length uint32, byteOffset *int64, key *uint32) (ntstatus error) = ntdll.NtWriteFile
+//sys   NtCreateSection(sectionHandle *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, maximumSize *int64, sectionPageProtection uint32, allocationAttributes uint32, fileHandle Handle) (ntstatus error) = ntdll.NtCreateSection
+//sys	NtClose(handle Handle) (ntstatus error) = ntdll.NtClose
+//sys	NtCreateProcess(process *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, parentProcess Handle, inheritObjectTable bool, sectionHandle Handle, debugPort Handle, exceptionPort Handle) (ntstatus error) = ntdll.NtCreateProcess
+//sys	NtReadVirtualMemory(process Handle, baseAddress uintptr, buffer *byte, size uintptr, numberOfBytesRead *uintptr) (ntstatus error) = ntdll.NtReadVirtualMemory
 
 // syscall interface implementation for other packages
 

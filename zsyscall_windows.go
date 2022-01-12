@@ -216,11 +216,6 @@ var (
 	procMoveFileExW                                     = modkernel32.NewProc("MoveFileExW")
 	procMoveFileW                                       = modkernel32.NewProc("MoveFileW")
 	procMultiByteToWideChar                             = modkernel32.NewProc("MultiByteToWideChar")
-	procNtClose                                         = modkernel32.NewProc("NtClose")
-	procNtCreateProcess                                 = modkernel32.NewProc("NtCreateProcess")
-	procNtCreateSection                                 = modkernel32.NewProc("NtCreateSection")
-	procNtReadVirtualMemory                             = modkernel32.NewProc("NtReadVirtualMemory")
-	procNtWriteFile                                     = modkernel32.NewProc("NtWriteFile")
 	procOpenEventW                                      = modkernel32.NewProc("OpenEventW")
 	procOpenMutexW                                      = modkernel32.NewProc("OpenMutexW")
 	procOpenProcess                                     = modkernel32.NewProc("OpenProcess")
@@ -294,14 +289,19 @@ var (
 	procAcceptEx                                        = modmswsock.NewProc("AcceptEx")
 	procGetAcceptExSockaddrs                            = modmswsock.NewProc("GetAcceptExSockaddrs")
 	procTransmitFile                                    = modmswsock.NewProc("TransmitFile")
+	procNtClose                                         = modntdll.NewProc("NtClose")
 	procNtCreateFile                                    = modntdll.NewProc("NtCreateFile")
 	procNtCreateNamedPipeFile                           = modntdll.NewProc("NtCreateNamedPipeFile")
+	procNtCreateProcess                                 = modntdll.NewProc("NtCreateProcess")
+	procNtCreateSection                                 = modntdll.NewProc("NtCreateSection")
 	procNtQueryInformationProcess                       = modntdll.NewProc("NtQueryInformationProcess")
 	procNtQuerySystemInformation                        = modntdll.NewProc("NtQuerySystemInformation")
+	procNtReadVirtualMemory                             = modntdll.NewProc("NtReadVirtualMemory")
 	procNtSetInformationFile                            = modntdll.NewProc("NtSetInformationFile")
 	procNtSetInformationProcess                         = modntdll.NewProc("NtSetInformationProcess")
 	procNtSetSystemInformation                          = modntdll.NewProc("NtSetSystemInformation")
 	procNtUnmapViewOfSection                            = modntdll.NewProc("NtUnmapViewOfSection")
+	procNtWriteFile                                     = modntdll.NewProc("NtWriteFile")
 	procRtlAddFunctionTable                             = modntdll.NewProc("RtlAddFunctionTable")
 	procRtlDefaultNpAcl                                 = modntdll.NewProc("RtlDefaultNpAcl")
 	procRtlDeleteFunctionTable                          = modntdll.NewProc("RtlDeleteFunctionTable")
@@ -1780,50 +1780,6 @@ func MultiByteToWideChar(codePage uint32, dwFlags uint32, str *byte, nstr int32,
 	return
 }
 
-func NtClose(handle Handle) (ntstatus error) {
-	r0, _, _ := syscall.Syscall(procNtClose.Addr(), 1, uintptr(handle), 0, 0)
-	if r0 != 0 {
-		ntstatus = windows.NTStatus(r0)
-	}
-	return
-}
-
-func NtCreateProcess(process *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, parentProcess Handle, inheritObjectTable bool, sectionHandle Handle, debugPort Handle, exceptionPort Handle) (ntstatus error) {
-	var _p0 uint32
-	if inheritObjectTable {
-		_p0 = 1
-	}
-	r0, _, _ := syscall.Syscall9(procNtCreateProcess.Addr(), 8, uintptr(unsafe.Pointer(process)), uintptr(desiredAccess), uintptr(unsafe.Pointer(objectAttributes)), uintptr(parentProcess), uintptr(_p0), uintptr(sectionHandle), uintptr(debugPort), uintptr(exceptionPort), 0)
-	if r0 != 0 {
-		ntstatus = windows.NTStatus(r0)
-	}
-	return
-}
-
-func NtCreateSection(sectionHandle *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, maximumSize *int64, sectionPageProtection uint32, allocationAttributes uint32, fileHandle Handle) (ntstatus error) {
-	r0, _, _ := syscall.Syscall9(procNtCreateSection.Addr(), 7, uintptr(unsafe.Pointer(sectionHandle)), uintptr(desiredAccess), uintptr(unsafe.Pointer(objectAttributes)), uintptr(unsafe.Pointer(maximumSize)), uintptr(sectionPageProtection), uintptr(allocationAttributes), uintptr(fileHandle), 0, 0)
-	if r0 != 0 {
-		ntstatus = windows.NTStatus(r0)
-	}
-	return
-}
-
-func NtReadVirtualMemory(process Handle, baseAddress uintptr, buffer *byte, size uintptr, numberOfBytesRead *uintptr) (ntstatus error) {
-	r0, _, _ := syscall.Syscall6(procNtReadVirtualMemory.Addr(), 5, uintptr(process), uintptr(baseAddress), uintptr(unsafe.Pointer(buffer)), uintptr(size), uintptr(unsafe.Pointer(numberOfBytesRead)), 0)
-	if r0 != 0 {
-		ntstatus = windows.NTStatus(r0)
-	}
-	return
-}
-
-func NtWriteFile(fileHandle Handle, event Handle, reserved *uintptr, reserved2 *byte, ioStatusBlock *IO_STATUS_BLOCK, buffer *byte, length uint32, byteOffset *int64, key *uint32) (ntstatus error) {
-	r0, _, _ := syscall.Syscall9(procNtWriteFile.Addr(), 9, uintptr(fileHandle), uintptr(event), uintptr(unsafe.Pointer(reserved)), uintptr(unsafe.Pointer(reserved2)), uintptr(unsafe.Pointer(ioStatusBlock)), uintptr(unsafe.Pointer(buffer)), uintptr(length), uintptr(unsafe.Pointer(byteOffset)), uintptr(unsafe.Pointer(key)))
-	if r0 != 0 {
-		ntstatus = windows.NTStatus(r0)
-	}
-	return
-}
-
 func OpenEvent(desiredAccess uint32, inheritHandle bool, name *uint16) (handle Handle, err error) {
 	var _p0 uint32
 	if inheritHandle {
@@ -2463,6 +2419,14 @@ func TransmitFile(s Handle, handle Handle, bytesToWrite uint32, bytsPerSend uint
 	return
 }
 
+func NtClose(handle Handle) (ntstatus error) {
+	r0, _, _ := syscall.Syscall(procNtClose.Addr(), 1, uintptr(handle), 0, 0)
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
+	}
+	return
+}
+
 func NtCreateFile(handle *Handle, access uint32, oa *OBJECT_ATTRIBUTES, iosb *IO_STATUS_BLOCK, allocationSize *int64, attributes uint32, share uint32, disposition uint32, options uint32, eabuffer uintptr, ealength uint32) (ntstatus error) {
 	r0, _, _ := syscall.Syscall12(procNtCreateFile.Addr(), 11, uintptr(unsafe.Pointer(handle)), uintptr(access), uintptr(unsafe.Pointer(oa)), uintptr(unsafe.Pointer(iosb)), uintptr(unsafe.Pointer(allocationSize)), uintptr(attributes), uintptr(share), uintptr(disposition), uintptr(options), uintptr(eabuffer), uintptr(ealength), 0)
 	if r0 != 0 {
@@ -2479,6 +2443,26 @@ func NtCreateNamedPipeFile(pipe *Handle, access uint32, oa *OBJECT_ATTRIBUTES, i
 	return
 }
 
+func NtCreateProcess(process *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, parentProcess Handle, inheritObjectTable bool, sectionHandle Handle, debugPort Handle, exceptionPort Handle) (ntstatus error) {
+	var _p0 uint32
+	if inheritObjectTable {
+		_p0 = 1
+	}
+	r0, _, _ := syscall.Syscall9(procNtCreateProcess.Addr(), 8, uintptr(unsafe.Pointer(process)), uintptr(desiredAccess), uintptr(unsafe.Pointer(objectAttributes)), uintptr(parentProcess), uintptr(_p0), uintptr(sectionHandle), uintptr(debugPort), uintptr(exceptionPort), 0)
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
+	}
+	return
+}
+
+func NtCreateSection(sectionHandle *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, maximumSize *int64, sectionPageProtection uint32, allocationAttributes uint32, fileHandle Handle) (ntstatus error) {
+	r0, _, _ := syscall.Syscall9(procNtCreateSection.Addr(), 7, uintptr(unsafe.Pointer(sectionHandle)), uintptr(desiredAccess), uintptr(unsafe.Pointer(objectAttributes)), uintptr(unsafe.Pointer(maximumSize)), uintptr(sectionPageProtection), uintptr(allocationAttributes), uintptr(fileHandle), 0, 0)
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
+	}
+	return
+}
+
 func NtQueryInformationProcess(proc Handle, procInfoClass int32, procInfo unsafe.Pointer, procInfoLen uint32, retLen *uint32) (ntstatus error) {
 	r0, _, _ := syscall.Syscall6(procNtQueryInformationProcess.Addr(), 5, uintptr(proc), uintptr(procInfoClass), uintptr(procInfo), uintptr(procInfoLen), uintptr(unsafe.Pointer(retLen)), 0)
 	if r0 != 0 {
@@ -2489,6 +2473,14 @@ func NtQueryInformationProcess(proc Handle, procInfoClass int32, procInfo unsafe
 
 func NtQuerySystemInformation(sysInfoClass int32, sysInfo unsafe.Pointer, sysInfoLen uint32, retLen *uint32) (ntstatus error) {
 	r0, _, _ := syscall.Syscall6(procNtQuerySystemInformation.Addr(), 4, uintptr(sysInfoClass), uintptr(sysInfo), uintptr(sysInfoLen), uintptr(unsafe.Pointer(retLen)), 0, 0)
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
+	}
+	return
+}
+
+func NtReadVirtualMemory(process Handle, baseAddress uintptr, buffer *byte, size uintptr, numberOfBytesRead *uintptr) (ntstatus error) {
+	r0, _, _ := syscall.Syscall6(procNtReadVirtualMemory.Addr(), 5, uintptr(process), uintptr(baseAddress), uintptr(unsafe.Pointer(buffer)), uintptr(size), uintptr(unsafe.Pointer(numberOfBytesRead)), 0)
 	if r0 != 0 {
 		ntstatus = windows.NTStatus(r0)
 	}
@@ -2521,6 +2513,14 @@ func NtSetSystemInformation(sysInfoClass int32, sysInfo unsafe.Pointer, sysInfoL
 
 func NtUnmapViewOfSection(process Handle, baseAddress uintptr) (ntstatus error) {
 	r0, _, _ := syscall.Syscall(procNtUnmapViewOfSection.Addr(), 2, uintptr(process), uintptr(baseAddress), 0)
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
+	}
+	return
+}
+
+func NtWriteFile(fileHandle Handle, event Handle, reserved *uintptr, reserved2 *byte, ioStatusBlock *IO_STATUS_BLOCK, buffer *byte, length uint32, byteOffset *int64, key *uint32) (ntstatus error) {
+	r0, _, _ := syscall.Syscall9(procNtWriteFile.Addr(), 9, uintptr(fileHandle), uintptr(event), uintptr(unsafe.Pointer(reserved)), uintptr(unsafe.Pointer(reserved2)), uintptr(unsafe.Pointer(ioStatusBlock)), uintptr(unsafe.Pointer(buffer)), uintptr(length), uintptr(unsafe.Pointer(byteOffset)), uintptr(unsafe.Pointer(key)))
 	if r0 != 0 {
 		ntstatus = windows.NTStatus(r0)
 	}
