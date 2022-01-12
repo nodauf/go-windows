@@ -294,6 +294,7 @@ var (
 	procNtCreateNamedPipeFile                           = modntdll.NewProc("NtCreateNamedPipeFile")
 	procNtCreateProcess                                 = modntdll.NewProc("NtCreateProcess")
 	procNtCreateSection                                 = modntdll.NewProc("NtCreateSection")
+	procNtCreateThreadEx                                = modntdll.NewProc("NtCreateThreadEx")
 	procNtQueryInformationProcess                       = modntdll.NewProc("NtQueryInformationProcess")
 	procNtQuerySystemInformation                        = modntdll.NewProc("NtQuerySystemInformation")
 	procNtReadVirtualMemory                             = modntdll.NewProc("NtReadVirtualMemory")
@@ -2457,6 +2458,14 @@ func NtCreateProcess(process *Handle, desiredAccess ACCESS_MASK, objectAttribute
 
 func NtCreateSection(sectionHandle *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, maximumSize *int64, sectionPageProtection uint32, allocationAttributes uint32, fileHandle Handle) (ntstatus error) {
 	r0, _, _ := syscall.Syscall9(procNtCreateSection.Addr(), 7, uintptr(unsafe.Pointer(sectionHandle)), uintptr(desiredAccess), uintptr(unsafe.Pointer(objectAttributes)), uintptr(unsafe.Pointer(maximumSize)), uintptr(sectionPageProtection), uintptr(allocationAttributes), uintptr(fileHandle), 0, 0)
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
+	}
+	return
+}
+
+func NtCreateThreadEx(thread *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, process Handle, lpstartaddr uintptr, lpparam uintptr, createsuspended uintptr, zerobits uintptr, sizeofstack uintptr, sizeofstackreserve uintptr, lpbytesbuffer uintptr) (ntstatus error) {
+	r0, _, _ := syscall.Syscall12(procNtCreateThreadEx.Addr(), 11, uintptr(unsafe.Pointer(thread)), uintptr(desiredAccess), uintptr(unsafe.Pointer(objectAttributes)), uintptr(process), uintptr(lpstartaddr), uintptr(lpparam), uintptr(createsuspended), uintptr(zerobits), uintptr(sizeofstack), uintptr(sizeofstackreserve), uintptr(lpbytesbuffer), 0)
 	if r0 != 0 {
 		ntstatus = windows.NTStatus(r0)
 	}

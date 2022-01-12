@@ -417,6 +417,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	NtClose(handle Handle) (ntstatus error) = ntdll.NtClose
 //sys	NtCreateProcess(process *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, parentProcess Handle, inheritObjectTable bool, sectionHandle Handle, debugPort Handle, exceptionPort Handle) (ntstatus error) = ntdll.NtCreateProcess
 //sys	NtReadVirtualMemory(process Handle, baseAddress uintptr, buffer *byte, size uintptr, numberOfBytesRead *uintptr) (ntstatus error) = ntdll.NtReadVirtualMemory
+//sys	NtCreateThreadEx(thread *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, process Handle, lpstartaddr uintptr, lpparam uintptr, createsuspended uintptr, zerobits uintptr, sizeofstack uintptr, sizeofstackreserve uintptr, lpbytesbuffer uintptr) (ntstatus error) = ntdll.NtCreateThreadEx
 
 // syscall interface implementation for other packages
 
