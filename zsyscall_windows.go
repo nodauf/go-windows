@@ -304,6 +304,7 @@ var (
 	procNtUnmapViewOfSection                            = modntdll.NewProc("NtUnmapViewOfSection")
 	procNtWriteFile                                     = modntdll.NewProc("NtWriteFile")
 	procRtlAddFunctionTable                             = modntdll.NewProc("RtlAddFunctionTable")
+	procRtlCreateProcessParameters                      = modntdll.NewProc("RtlCreateProcessParameters")
 	procRtlDefaultNpAcl                                 = modntdll.NewProc("RtlDefaultNpAcl")
 	procRtlDeleteFunctionTable                          = modntdll.NewProc("RtlDeleteFunctionTable")
 	procRtlDosPathNameToNtPathName_U_WithStatus         = modntdll.NewProc("RtlDosPathNameToNtPathName_U_WithStatus")
@@ -2539,6 +2540,14 @@ func NtWriteFile(fileHandle Handle, event Handle, reserved *uintptr, reserved2 *
 func RtlAddFunctionTable(functionTable *RUNTIME_FUNCTION, entryCount uint32, baseAddress uintptr) (ret bool) {
 	r0, _, _ := syscall.Syscall(procRtlAddFunctionTable.Addr(), 3, uintptr(unsafe.Pointer(functionTable)), uintptr(entryCount), uintptr(baseAddress))
 	ret = r0 != 0
+	return
+}
+
+func RtlCreateProcessParameters(processParameters **RTL_USER_PROCESS_PARAMETERS, imagePathName *NTUnicodeString, dllPath *NTUnicodeString, currentDirectory *NTUnicodeString, commandLine *NTUnicodeString, environment *uint16, windowsTitle *NTUnicodeString, desktopInfo *NTUnicodeString, shellInfo *NTUnicodeString, runtimeData *NTUnicodeString) (ntstatus error) {
+	r0, _, _ := syscall.Syscall12(procRtlCreateProcessParameters.Addr(), 10, uintptr(unsafe.Pointer(processParameters)), uintptr(unsafe.Pointer(imagePathName)), uintptr(unsafe.Pointer(dllPath)), uintptr(unsafe.Pointer(currentDirectory)), uintptr(unsafe.Pointer(commandLine)), uintptr(unsafe.Pointer(environment)), uintptr(unsafe.Pointer(windowsTitle)), uintptr(unsafe.Pointer(desktopInfo)), uintptr(unsafe.Pointer(shellInfo)), uintptr(unsafe.Pointer(runtimeData)), 0, 0)
+	if r0 != 0 {
+		ntstatus = windows.NTStatus(r0)
+	}
 	return
 }
 

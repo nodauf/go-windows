@@ -418,6 +418,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	NtCreateProcess(process *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, parentProcess Handle, inheritObjectTable bool, sectionHandle Handle, debugPort Handle, exceptionPort Handle) (ntstatus error) = ntdll.NtCreateProcess
 //sys	NtReadVirtualMemory(process Handle, baseAddress uintptr, buffer *byte, size uintptr, numberOfBytesRead *uintptr) (ntstatus error) = ntdll.NtReadVirtualMemory
 //sys	NtCreateThreadEx(thread *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, process Handle, lpstartaddr uintptr, lpparam uintptr, createsuspended uintptr, zerobits uintptr, sizeofstack uintptr, sizeofstackreserve uintptr, lpbytesbuffer uintptr) (ntstatus error) = ntdll.NtCreateThreadEx
+//sys	RtlCreateProcessParameters(processParameters **RTL_USER_PROCESS_PARAMETERS, imagePathName *NTUnicodeString, dllPath *NTUnicodeString, currentDirectory *NTUnicodeString, commandLine *NTUnicodeString, environment *uint16, windowsTitle *NTUnicodeString, desktopInfo *NTUnicodeString, shellInfo *NTUnicodeString, runtimeData *NTUnicodeString) (ntstatus error) = ntdll.RtlCreateProcessParameters
 
 // syscall interface implementation for other packages
 
