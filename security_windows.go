@@ -283,6 +283,8 @@ const (
 	TOKEN_EXECUTE = STANDARD_RIGHTS_EXECUTE
 )
 
+type TokenType uint32
+
 const (
 	// do not reorder
 	TokenUser = 1 + iota
@@ -292,7 +294,7 @@ const (
 	TokenPrimaryGroup
 	TokenDefaultDacl
 	TokenSource
-	TokenType
+	xxTokenType
 	TokenImpersonationLevel
 	TokenStatistics
 	TokenRestrictedSids
@@ -358,9 +360,14 @@ type LUID struct {
 	HighPart int32
 }
 
-type LUIDAndAttributes struct {
+type LUID_AND_ATTRIBUTES struct {
 	Luid       LUID
 	Attributes uint32
+}
+
+type TOKEN_PRIVILEGES struct {
+	PrivilegeCount uint32
+	Privileges     [1]LUID_AND_ATTRIBUTES
 }
 
 type SIDAndAttributes struct {

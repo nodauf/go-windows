@@ -54,17 +54,28 @@ var (
 	modwintrust = windows.NewLazySystemDLL("wintrust.dll")
 	modws2_32   = windows.NewLazySystemDLL("ws2_32.dll")
 
+	procAdjustTokenPrivileges                           = modadvapi32.NewProc("AdjustTokenPrivileges")
+	procConvertSidToStringSidW                          = modadvapi32.NewProc("ConvertSidToStringSidW")
+	procConvertStringSidToSidW                          = modadvapi32.NewProc("ConvertStringSidToSidW")
+	procCopySid                                         = modadvapi32.NewProc("CopySid")
 	procCreateProcessAsUserW                            = modadvapi32.NewProc("CreateProcessAsUserW")
 	procCryptAcquireContextW                            = modadvapi32.NewProc("CryptAcquireContextW")
 	procCryptGenRandom                                  = modadvapi32.NewProc("CryptGenRandom")
 	procCryptReleaseContext                             = modadvapi32.NewProc("CryptReleaseContext")
+	procDuplicateTokenEx                                = modadvapi32.NewProc("DuplicateTokenEx")
+	procGetLengthSid                                    = modadvapi32.NewProc("GetLengthSid")
 	procInitiateSystemShutdownExW                       = modadvapi32.NewProc("InitiateSystemShutdownExW")
+	procLookupAccountNameW                              = modadvapi32.NewProc("LookupAccountNameW")
+	procLookupAccountSidW                               = modadvapi32.NewProc("LookupAccountSidW")
+	procLookupPrivilegeValueW                           = modadvapi32.NewProc("LookupPrivilegeValueW")
+	procOpenThreadToken                                 = modadvapi32.NewProc("OpenThreadToken")
 	procRegCloseKey                                     = modadvapi32.NewProc("RegCloseKey")
 	procRegEnumKeyExW                                   = modadvapi32.NewProc("RegEnumKeyExW")
 	procRegNotifyChangeKeyValue                         = modadvapi32.NewProc("RegNotifyChangeKeyValue")
 	procRegOpenKeyExW                                   = modadvapi32.NewProc("RegOpenKeyExW")
 	procRegQueryInfoKeyW                                = modadvapi32.NewProc("RegQueryInfoKeyW")
 	procRegQueryValueExW                                = modadvapi32.NewProc("RegQueryValueExW")
+	procSetTokenInformation                             = modadvapi32.NewProc("SetTokenInformation")
 	procCertAddCertificateContextToStore                = modcrypt32.NewProc("CertAddCertificateContextToStore")
 	procCertCloseStore                                  = modcrypt32.NewProc("CertCloseStore")
 	procCertCreateCertificateContext                    = modcrypt32.NewProc("CertCreateCertificateContext")
@@ -219,6 +230,7 @@ var (
 	procOpenEventW                                      = modkernel32.NewProc("OpenEventW")
 	procOpenMutexW                                      = modkernel32.NewProc("OpenMutexW")
 	procOpenProcess                                     = modkernel32.NewProc("OpenProcess")
+	procOpenProcessToken                                = modkernel32.NewProc("OpenProcessToken")
 	procOpenThread                                      = modkernel32.NewProc("OpenThread")
 	procPostQueuedCompletionStatus                      = modkernel32.NewProc("PostQueuedCompletionStatus")
 	procProcess32FirstW                                 = modkernel32.NewProc("Process32FirstW")
@@ -371,6 +383,43 @@ var (
 	procsocket                                          = modws2_32.NewProc("socket")
 )
 
+func AdjustTokenPrivileges(token syscall.Token, disableAllPrivileges bool, newstate *TOKEN_PRIVILEGES, buflen uint32, prevstate *TOKEN_PRIVILEGES, returnlen *uint32) (ret uint32, err error) {
+	var _p0 uint32
+	if disableAllPrivileges {
+		_p0 = 1
+	}
+	r0, _, e1 := syscall.Syscall6(procAdjustTokenPrivileges.Addr(), 6, uintptr(token), uintptr(_p0), uintptr(unsafe.Pointer(newstate)), uintptr(buflen), uintptr(unsafe.Pointer(prevstate)), uintptr(unsafe.Pointer(returnlen)))
+	ret = uint32(r0)
+	if true {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func ConvertSidToStringSid(sid *SID, stringSid **uint16) (err error) {
+	r1, _, e1 := syscall.Syscall(procConvertSidToStringSidW.Addr(), 2, uintptr(unsafe.Pointer(sid)), uintptr(unsafe.Pointer(stringSid)), 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func ConvertStringSidToSid(stringSid *uint16, sid **SID) (err error) {
+	r1, _, e1 := syscall.Syscall(procConvertStringSidToSidW.Addr(), 2, uintptr(unsafe.Pointer(stringSid)), uintptr(unsafe.Pointer(sid)), 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func CopySid(destSidLen uint32, destSid *SID, srcSid *SID) (err error) {
+	r1, _, e1 := syscall.Syscall(procCopySid.Addr(), 3, uintptr(destSidLen), uintptr(unsafe.Pointer(destSid)), uintptr(unsafe.Pointer(srcSid)))
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func CreateProcessAsUser(token Token, appName *uint16, commandLine *uint16, procSecurity *SecurityAttributes, threadSecurity *SecurityAttributes, inheritHandles bool, creationFlags uint32, env *uint16, currentDir *uint16, startupInfo *StartupInfo, outProcInfo *ProcessInformation) (err error) {
 	var _p0 uint32
 	if inheritHandles {
@@ -407,6 +456,20 @@ func CryptReleaseContext(provhandle Handle, flags uint32) (err error) {
 	return
 }
 
+func DuplicateTokenEx(hExistingToken syscall.Token, dwDesiredAccess uint32, lpTokenAttributes *syscall.SecurityAttributes, impersonationLevel uint32, tokenType TokenType, phNewToken *syscall.Token) (err error) {
+	r1, _, e1 := syscall.Syscall6(procDuplicateTokenEx.Addr(), 6, uintptr(hExistingToken), uintptr(dwDesiredAccess), uintptr(unsafe.Pointer(lpTokenAttributes)), uintptr(impersonationLevel), uintptr(tokenType), uintptr(unsafe.Pointer(phNewToken)))
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func GetLengthSid(sid *SID) (len uint32) {
+	r0, _, _ := syscall.Syscall(procGetLengthSid.Addr(), 1, uintptr(unsafe.Pointer(sid)), 0, 0)
+	len = uint32(r0)
+	return
+}
+
 func InitiateSystemShutdownEx(machineName *uint16, message *uint16, timeout uint32, forceAppsClosed bool, rebootAfterShutdown bool, reason uint32) (err error) {
 	var _p0 uint32
 	if forceAppsClosed {
@@ -417,6 +480,42 @@ func InitiateSystemShutdownEx(machineName *uint16, message *uint16, timeout uint
 		_p1 = 1
 	}
 	r1, _, e1 := syscall.Syscall6(procInitiateSystemShutdownExW.Addr(), 6, uintptr(unsafe.Pointer(machineName)), uintptr(unsafe.Pointer(message)), uintptr(timeout), uintptr(_p0), uintptr(_p1), uintptr(reason))
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func LookupAccountName(systemName *uint16, accountName *uint16, sid *SID, sidLen *uint32, refdDomainName *uint16, refdDomainNameLen *uint32, use *uint32) (err error) {
+	r1, _, e1 := syscall.Syscall9(procLookupAccountNameW.Addr(), 7, uintptr(unsafe.Pointer(systemName)), uintptr(unsafe.Pointer(accountName)), uintptr(unsafe.Pointer(sid)), uintptr(unsafe.Pointer(sidLen)), uintptr(unsafe.Pointer(refdDomainName)), uintptr(unsafe.Pointer(refdDomainNameLen)), uintptr(unsafe.Pointer(use)), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func LookupAccountSid(systemName *uint16, sid *SID, name *uint16, nameLen *uint32, refdDomainName *uint16, refdDomainNameLen *uint32, use *uint32) (err error) {
+	r1, _, e1 := syscall.Syscall9(procLookupAccountSidW.Addr(), 7, uintptr(unsafe.Pointer(systemName)), uintptr(unsafe.Pointer(sid)), uintptr(unsafe.Pointer(name)), uintptr(unsafe.Pointer(nameLen)), uintptr(unsafe.Pointer(refdDomainName)), uintptr(unsafe.Pointer(refdDomainNameLen)), uintptr(unsafe.Pointer(use)), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func LookupPrivilegeValue(systemname *uint16, name *uint16, luid *LUID) (err error) {
+	r1, _, e1 := syscall.Syscall(procLookupPrivilegeValueW.Addr(), 3, uintptr(unsafe.Pointer(systemname)), uintptr(unsafe.Pointer(name)), uintptr(unsafe.Pointer(luid)))
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func OpenThreadToken(h syscall.Handle, access uint32, openasself bool, token *syscall.Token) (err error) {
+	var _p0 uint32
+	if openasself {
+		_p0 = 1
+	}
+	r1, _, e1 := syscall.Syscall6(procOpenThreadToken.Addr(), 4, uintptr(h), uintptr(access), uintptr(_p0), uintptr(unsafe.Pointer(token)), 0, 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
@@ -475,6 +574,14 @@ func RegQueryValueEx(key Handle, name *uint16, reserved *uint32, valtype *uint32
 	r0, _, _ := syscall.Syscall6(procRegQueryValueExW.Addr(), 6, uintptr(key), uintptr(unsafe.Pointer(name)), uintptr(unsafe.Pointer(reserved)), uintptr(unsafe.Pointer(valtype)), uintptr(unsafe.Pointer(buf)), uintptr(unsafe.Pointer(buflen)))
 	if r0 != 0 {
 		regerrno = syscall.Errno(r0)
+	}
+	return
+}
+
+func SetTokenInformation(tokenHandle syscall.Token, tokenInformationClass uint32, tokenInformation uintptr, tokenInformationLength uint32) (err error) {
+	r1, _, e1 := syscall.Syscall6(procSetTokenInformation.Addr(), 4, uintptr(tokenHandle), uintptr(tokenInformationClass), uintptr(tokenInformation), uintptr(tokenInformationLength), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
 	}
 	return
 }
@@ -617,8 +724,8 @@ func CryptAcquireCertificatePrivateKey(cert *CertContext, flags uint32, paramete
 	return
 }
 
-func CryptDecodeObject(encodingType uint32, structType *byte, encodedBytes *byte, lenEncodedBytes uint32, flags uint32, decoded unsafe.Pointer, decodedLen *uint32) (err error) {
-	r1, _, e1 := syscall.Syscall9(procCryptDecodeObject.Addr(), 7, uintptr(encodingType), uintptr(unsafe.Pointer(structType)), uintptr(unsafe.Pointer(encodedBytes)), uintptr(lenEncodedBytes), uintptr(flags), uintptr(decoded), uintptr(unsafe.Pointer(decodedLen)), 0, 0)
+func CryptDecodeObject(encodingType uint32, structType *byte, encodedBytes *byte, flenEncodedBytes uint32, flags uint32, decoded unsafe.Pointer, decodedLen *uint32) (err error) {
+	r1, _, e1 := syscall.Syscall9(procCryptDecodeObject.Addr(), 7, uintptr(encodingType), uintptr(unsafe.Pointer(structType)), uintptr(unsafe.Pointer(encodedBytes)), uintptr(flenEncodedBytes), uintptr(flags), uintptr(decoded), uintptr(unsafe.Pointer(decodedLen)), 0, 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
@@ -1818,6 +1925,11 @@ func OpenProcess(desiredAccess uint32, inheritHandle bool, processId uint32) (ha
 	if handle == 0 {
 		err = errnoErr(e1)
 	}
+	return
+}
+
+func OpenProcessToken(processHandle Handle, desiredAccess uint32, tokenHandle *Handle) {
+	syscall.Syscall(procOpenProcessToken.Addr(), 3, uintptr(processHandle), uintptr(desiredAccess), uintptr(unsafe.Pointer(tokenHandle)))
 	return
 }
 
