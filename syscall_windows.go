@@ -193,7 +193,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys   DeleteProcThreadAttributeList(attrlist *ProcThreadAttributeList) = DeleteProcThreadAttributeList
 //sys   UpdateProcThreadAttribute(lpAttributeList *ProcThreadAttributeList, dwFlags uint32, attribute uint32, lpValue *uintptr, cbSize uintptr, lpPreviousValue uintptr, lpReturnSize *uintptr) (err error)
 //sys	OpenProcess(desiredAccess uint32, inheritHandle bool, processId uint32) (handle Handle, err error)
-//sys	OpenProcessToken(processHandle Handle, desiredAccess uint32, tokenHandle *Handle)
+//sys	OpenProcessToken(processHandle Handle, desiredAccess uint32, tokenHandle *Handle) (err error)
 //sys	ShellExecute(hwnd Handle, verb *uint16, file *uint16, args *uint16, cwd *uint16, showCmd int32) (err error) [failretval<=32] = shell32.ShellExecuteW
 //sys	GetWindowThreadProcessId(hwnd HWND, pid *uint32) (tid uint32, err error) = user32.GetWindowThreadProcessId
 //sys	GetShellWindow() (shellWindow HWND) = user32.GetShellWindow
