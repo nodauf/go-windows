@@ -384,7 +384,7 @@ var (
 	procsocket                                          = modws2_32.NewProc("socket")
 )
 
-func AdjustTokenPrivileges(token syscall.Token, disableAllPrivileges bool, newstate *TOKEN_PRIVILEGES, buflen uint32, prevstate *TOKEN_PRIVILEGES, returnlen *uint32) (ret uint32, err error) {
+func AdjustTokenPrivileges(token windows.Token, disableAllPrivileges bool, newstate *TOKEN_PRIVILEGES, buflen uint32, prevstate *TOKEN_PRIVILEGES, returnlen *uint32) (ret uint32, err error) {
 	var _p0 uint32
 	if disableAllPrivileges {
 		_p0 = 1
@@ -457,7 +457,7 @@ func CryptReleaseContext(provhandle Handle, flags uint32) (err error) {
 	return
 }
 
-func DuplicateTokenEx(hExistingToken syscall.Token, dwDesiredAccess uint32, lpTokenAttributes *syscall.SecurityAttributes, impersonationLevel uint32, tokenType TokenType, phNewToken *syscall.Token) (err error) {
+func DuplicateTokenEx(hExistingToken windows.Token, dwDesiredAccess uint32, lpTokenAttributes *syscall.SecurityAttributes, impersonationLevel uint32, tokenType TokenType, phNewToken *windows.Token) (err error) {
 	r1, _, e1 := syscall.Syscall6(procDuplicateTokenEx.Addr(), 6, uintptr(hExistingToken), uintptr(dwDesiredAccess), uintptr(unsafe.Pointer(lpTokenAttributes)), uintptr(impersonationLevel), uintptr(tokenType), uintptr(unsafe.Pointer(phNewToken)))
 	if r1 == 0 {
 		err = errnoErr(e1)
@@ -511,7 +511,7 @@ func LookupPrivilegeValue(systemname *uint16, name *uint16, luid *LUID) (err err
 	return
 }
 
-func OpenThreadToken(h syscall.Handle, access uint32, openasself bool, token *syscall.Token) (err error) {
+func OpenThreadToken(h syscall.Handle, access uint32, openasself bool, token *windows.Token) (err error) {
 	var _p0 uint32
 	if openasself {
 		_p0 = 1
@@ -579,7 +579,7 @@ func RegQueryValueEx(key Handle, name *uint16, reserved *uint32, valtype *uint32
 	return
 }
 
-func SetTokenInformation(tokenHandle syscall.Token, tokenInformationClass uint32, tokenInformation uintptr, tokenInformationLength uint32) (err error) {
+func SetTokenInformation(tokenHandle windows.Token, tokenInformationClass uint32, tokenInformation uintptr, tokenInformationLength uint32) (err error) {
 	r1, _, e1 := syscall.Syscall6(procSetTokenInformation.Addr(), 4, uintptr(tokenHandle), uintptr(tokenInformationClass), uintptr(tokenInformation), uintptr(tokenInformationLength), 0, 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
