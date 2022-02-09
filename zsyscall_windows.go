@@ -344,6 +344,7 @@ var (
 	procSHGetKnownFolderPath                            = modshell32.NewProc("SHGetKnownFolderPath")
 	procShellExecuteW                                   = modshell32.NewProc("ShellExecuteW")
 	procExitWindowsEx                                   = moduser32.NewProc("ExitWindowsEx")
+	procGetCursorPos                                    = moduser32.NewProc("GetCursorPos")
 	procGetShellWindow                                  = moduser32.NewProc("GetShellWindow")
 	procGetWindowThreadProcessId                        = moduser32.NewProc("GetWindowThreadProcessId")
 	procMessageBoxW                                     = moduser32.NewProc("MessageBoxW")
@@ -2855,6 +2856,14 @@ func ShellExecute(hwnd Handle, verb *uint16, file *uint16, args *uint16, cwd *ui
 
 func ExitWindowsEx(flags uint32, reason uint32) (err error) {
 	r1, _, e1 := syscall.Syscall(procExitWindowsEx.Addr(), 2, uintptr(flags), uintptr(reason), 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func GetCursorPos(point *POINT) (err error) {
+	r1, _, e1 := syscall.Syscall(procGetCursorPos.Addr(), 1, uintptr(unsafe.Pointer(point)), 0, 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
