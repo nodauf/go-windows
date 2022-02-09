@@ -1929,7 +1929,7 @@ func OpenProcess(desiredAccess uint32, inheritHandle bool, processId uint32) (ha
 	return
 }
 
-func OpenProcessToken(processHandle Handle, desiredAccess uint32, tokenHandle *Handle) (err error) {
+func OpenProcessToken(processHandle Handle, desiredAccess uint32, tokenHandle *Token) (err error) {
 	r1, _, e1 := syscall.Syscall(procOpenProcessToken.Addr(), 3, uintptr(processHandle), uintptr(desiredAccess), uintptr(unsafe.Pointer(tokenHandle)))
 	if r1 == 0 {
 		err = errnoErr(e1)
