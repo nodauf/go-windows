@@ -122,6 +122,7 @@ var (
 	procCreateNamedPipeW                                = modkernel32.NewProc("CreateNamedPipeW")
 	procCreatePipe                                      = modkernel32.NewProc("CreatePipe")
 	procCreateProcessW                                  = modkernel32.NewProc("CreateProcessW")
+	procCreateRemoteThreadEx                            = modkernel32.NewProc("CreateRemoteThreadEx")
 	procCreateSymbolicLinkW                             = modkernel32.NewProc("CreateSymbolicLinkW")
 	procCreateToolhelp32Snapshot                        = modkernel32.NewProc("CreateToolhelp32Snapshot")
 	procDefineDosDeviceW                                = modkernel32.NewProc("DefineDosDeviceW")
@@ -725,8 +726,8 @@ func CryptAcquireCertificatePrivateKey(cert *CertContext, flags uint32, paramete
 	return
 }
 
-func CryptDecodeObject(encodingType uint32, structType *byte, encodedBytes *byte, flenEncodedBytes uint32, flags uint32, decoded unsafe.Pointer, decodedLen *uint32) (err error) {
-	r1, _, e1 := syscall.Syscall9(procCryptDecodeObject.Addr(), 7, uintptr(encodingType), uintptr(unsafe.Pointer(structType)), uintptr(unsafe.Pointer(encodedBytes)), uintptr(flenEncodedBytes), uintptr(flags), uintptr(decoded), uintptr(unsafe.Pointer(decodedLen)), 0, 0)
+func CryptDecodeObject(encodingType uint32, structType *byte, encodedBytes *byte, lenEncodedBytes uint32, flags uint32, decoded unsafe.Pointer, decodedLen *uint32) (err error) {
+	r1, _, e1 := syscall.Syscall9(procCryptDecodeObject.Addr(), 7, uintptr(encodingType), uintptr(unsafe.Pointer(structType)), uintptr(unsafe.Pointer(encodedBytes)), uintptr(lenEncodedBytes), uintptr(flags), uintptr(decoded), uintptr(unsafe.Pointer(decodedLen)), 0, 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
@@ -973,6 +974,14 @@ func CreateProcess(appName *uint16, commandLine *uint16, procSecurity *SecurityA
 		_p0 = 1
 	}
 	r1, _, e1 := syscall.Syscall12(procCreateProcessW.Addr(), 10, uintptr(unsafe.Pointer(appName)), uintptr(unsafe.Pointer(commandLine)), uintptr(unsafe.Pointer(procSecurity)), uintptr(unsafe.Pointer(threadSecurity)), uintptr(_p0), uintptr(creationFlags), uintptr(unsafe.Pointer(env)), uintptr(unsafe.Pointer(currentDir)), uintptr(unsafe.Pointer(startupInfo)), uintptr(unsafe.Pointer(outProcInfo)), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func CreateRemoteThreadEx(process Handle, threadAttributes *SecurityAttributes, stackSize uintptr, startAddress uintptr, lpParameter uintptr, dwCreationFlags uint32, lpThreadId *uint32) (err error) {
+	r1, _, e1 := syscall.Syscall9(procCreateRemoteThreadEx.Addr(), 7, uintptr(process), uintptr(unsafe.Pointer(threadAttributes)), uintptr(stackSize), uintptr(startAddress), uintptr(lpParameter), uintptr(dwCreationFlags), uintptr(unsafe.Pointer(lpThreadId)), 0, 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
