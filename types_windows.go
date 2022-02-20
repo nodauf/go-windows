@@ -184,6 +184,7 @@ const (
 	PROCESS_VM_OPERATION              = 0x0008
 	PROCESS_VM_READ                   = 0x0010
 	PROCESS_VM_WRITE                  = 0x0020
+	PROCESS_ALL_ACCESS                = STANDARD_RIGHTS_REQUIRED | SYNCHRONIZE | 0xFFF
 
 	// Access rights for thread.
 	THREAD_DIRECT_IMPERSONATION      = 0x0200
