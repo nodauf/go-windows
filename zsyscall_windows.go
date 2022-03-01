@@ -1715,7 +1715,7 @@ func getThreadPreferredUILanguages(flags uint32, numLanguages *uint32, buf *uint
 	return
 }
 
-func getTickCount64() (ms uint64) {
+func GetTickCount64() (ms uint64) {
 	r0, _, _ := syscall.Syscall(procGetTickCount64.Addr(), 0, 0, 0, 0)
 	ms = uint64(r0)
 	return
