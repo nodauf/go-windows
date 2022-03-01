@@ -3278,3 +3278,5 @@ type ProcessMemoryCounters struct {
 	PagefileUsage              int
 	PeakPagefileUsage          int
 }
+
+var MiniDumpWithFullMemory = 0x00000002
