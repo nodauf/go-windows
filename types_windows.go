@@ -3265,3 +3265,16 @@ type POINT struct {
 	X int32
 	Y int32
 }
+
+type ProcessMemoryCounters struct {
+	Cb                         uint32
+	PageFaultCount             uint32
+	PeakWorkingSetSize         int
+	WorkingSetSize             int
+	QuotaPeakPagedPoolUsage    int
+	QuotaPagedPoolUsage        int
+	QuotaPeakNonPagedPoolUsage int
+	QuotaNonPagedPoolUsage     int
+	PagefileUsage              int
+	PeakPagefileUsage          int
+}
