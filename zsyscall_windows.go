@@ -38,6 +38,7 @@ func errnoErr(e syscall.Errno) error {
 }
 
 var (
+	modDbgHelp  = windows.NewLazySystemDLL("DbgHelp.dll")
 	modadvapi32 = windows.NewLazySystemDLL("advapi32.dll")
 	modcrypt32  = windows.NewLazySystemDLL("crypt32.dll")
 	moddnsapi   = windows.NewLazySystemDLL("dnsapi.dll")
@@ -54,6 +55,7 @@ var (
 	modwintrust = windows.NewLazySystemDLL("wintrust.dll")
 	modws2_32   = windows.NewLazySystemDLL("ws2_32.dll")
 
+	procMiniDumpWriteDump                               = modDbgHelp.NewProc("MiniDumpWriteDump")
 	procAdjustTokenPrivileges                           = modadvapi32.NewProc("AdjustTokenPrivileges")
 	procConvertSidToStringSidW                          = modadvapi32.NewProc("ConvertSidToStringSidW")
 	procConvertStringSidToSidW                          = modadvapi32.NewProc("ConvertStringSidToSidW")
@@ -64,9 +66,13 @@ var (
 	procCryptReleaseContext                             = modadvapi32.NewProc("CryptReleaseContext")
 	procDuplicateTokenEx                                = modadvapi32.NewProc("DuplicateTokenEx")
 	procGetLengthSid                                    = modadvapi32.NewProc("GetLengthSid")
+	procImpersonateLoggedOnUser                         = modadvapi32.NewProc("ImpersonateLoggedOnUser")
 	procInitiateSystemShutdownExW                       = modadvapi32.NewProc("InitiateSystemShutdownExW")
+	procLogonUserW                                      = modadvapi32.NewProc("LogonUserW")
 	procLookupAccountNameW                              = modadvapi32.NewProc("LookupAccountNameW")
 	procLookupAccountSidW                               = modadvapi32.NewProc("LookupAccountSidW")
+	procLookupPrivilegeDisplayNameW                     = modadvapi32.NewProc("LookupPrivilegeDisplayNameW")
+	procLookupPrivilegeNameW                            = modadvapi32.NewProc("LookupPrivilegeNameW")
 	procLookupPrivilegeValueW                           = modadvapi32.NewProc("LookupPrivilegeValueW")
 	procOpenThreadToken                                 = modadvapi32.NewProc("OpenThreadToken")
 	procRegCloseKey                                     = modadvapi32.NewProc("RegCloseKey")
@@ -237,6 +243,7 @@ var (
 	procProcess32FirstW                                 = modkernel32.NewProc("Process32FirstW")
 	procProcess32NextW                                  = modkernel32.NewProc("Process32NextW")
 	procProcessIdToSessionId                            = modkernel32.NewProc("ProcessIdToSessionId")
+	procPssCaptureSnapshot                              = modkernel32.NewProc("PssCaptureSnapshot")
 	procPulseEvent                                      = modkernel32.NewProc("PulseEvent")
 	procQueryDosDeviceW                                 = modkernel32.NewProc("QueryDosDeviceW")
 	procQueryFullProcessImageNameW                      = modkernel32.NewProc("QueryFullProcessImageNameW")
@@ -317,6 +324,7 @@ var (
 	procNtUnmapViewOfSection                            = modntdll.NewProc("NtUnmapViewOfSection")
 	procNtWriteFile                                     = modntdll.NewProc("NtWriteFile")
 	procRtlAddFunctionTable                             = modntdll.NewProc("RtlAddFunctionTable")
+	procRtlCopyMemory                                   = modntdll.NewProc("RtlCopyMemory")
 	procRtlCreateProcessParameters                      = modntdll.NewProc("RtlCreateProcessParameters")
 	procRtlCreateProcessParametersEx                    = modntdll.NewProc("RtlCreateProcessParametersEx")
 	procRtlDefaultNpAcl                                 = modntdll.NewProc("RtlDefaultNpAcl")
@@ -342,6 +350,7 @@ var (
 	procGetModuleBaseNameW                              = modpsapi.NewProc("GetModuleBaseNameW")
 	procGetModuleFileNameExW                            = modpsapi.NewProc("GetModuleFileNameExW")
 	procGetModuleInformation                            = modpsapi.NewProc("GetModuleInformation")
+	procGetProcessMemoryInfo                            = modpsapi.NewProc("GetProcessMemoryInfo")
 	procCommandLineToArgvW                              = modshell32.NewProc("CommandLineToArgvW")
 	procSHGetKnownFolderPath                            = modshell32.NewProc("SHGetKnownFolderPath")
 	procShellExecuteW                                   = modshell32.NewProc("ShellExecuteW")
@@ -385,6 +394,14 @@ var (
 	procshutdown                                        = modws2_32.NewProc("shutdown")
 	procsocket                                          = modws2_32.NewProc("socket")
 )
+
+func MiniDumpWriteDump(hProcess windows.Handle, pid uint32, hFile uintptr, dumpType uint32, exceptionParam uintptr, userStreamParam uintptr, callbackParam uintptr) (err error) {
+	r1, _, e1 := syscall.Syscall9(procMiniDumpWriteDump.Addr(), 7, uintptr(hProcess), uintptr(pid), uintptr(hFile), uintptr(dumpType), uintptr(exceptionParam), uintptr(userStreamParam), uintptr(callbackParam), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
 
 func AdjustTokenPrivileges(token windows.Token, disableAllPrivileges bool, newstate *TOKEN_PRIVILEGES, buflen uint32, prevstate *TOKEN_PRIVILEGES, returnlen *uint32) (ret uint32, err error) {
 	var _p0 uint32
@@ -473,6 +490,14 @@ func GetLengthSid(sid *SID) (len uint32) {
 	return
 }
 
+func ImpersonateLoggedOnUser(hToken windows.Token) (err error) {
+	r1, _, e1 := syscall.Syscall(procImpersonateLoggedOnUser.Addr(), 1, uintptr(hToken), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func InitiateSystemShutdownEx(machineName *uint16, message *uint16, timeout uint32, forceAppsClosed bool, rebootAfterShutdown bool, reason uint32) (err error) {
 	var _p0 uint32
 	if forceAppsClosed {
@@ -489,6 +514,14 @@ func InitiateSystemShutdownEx(machineName *uint16, message *uint16, timeout uint
 	return
 }
 
+func LogonUser(lpszUsername *uint16, lpszDomain *uint16, lpszPassword *uint16, dwLogonType uint32, dwLogonProvider uint32, phToken *windows.Token) (err error) {
+	r1, _, e1 := syscall.Syscall6(procLogonUserW.Addr(), 6, uintptr(unsafe.Pointer(lpszUsername)), uintptr(unsafe.Pointer(lpszDomain)), uintptr(unsafe.Pointer(lpszPassword)), uintptr(dwLogonType), uintptr(dwLogonProvider), uintptr(unsafe.Pointer(phToken)))
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func LookupAccountName(systemName *uint16, accountName *uint16, sid *SID, sidLen *uint32, refdDomainName *uint16, refdDomainNameLen *uint32, use *uint32) (err error) {
 	r1, _, e1 := syscall.Syscall9(procLookupAccountNameW.Addr(), 7, uintptr(unsafe.Pointer(systemName)), uintptr(unsafe.Pointer(accountName)), uintptr(unsafe.Pointer(sid)), uintptr(unsafe.Pointer(sidLen)), uintptr(unsafe.Pointer(refdDomainName)), uintptr(unsafe.Pointer(refdDomainNameLen)), uintptr(unsafe.Pointer(use)), 0, 0)
 	if r1 == 0 {
@@ -499,6 +532,40 @@ func LookupAccountName(systemName *uint16, accountName *uint16, sid *SID, sidLen
 
 func LookupAccountSid(systemName *uint16, sid *SID, name *uint16, nameLen *uint32, refdDomainName *uint16, refdDomainNameLen *uint32, use *uint32) (err error) {
 	r1, _, e1 := syscall.Syscall9(procLookupAccountSidW.Addr(), 7, uintptr(unsafe.Pointer(systemName)), uintptr(unsafe.Pointer(sid)), uintptr(unsafe.Pointer(name)), uintptr(unsafe.Pointer(nameLen)), uintptr(unsafe.Pointer(refdDomainName)), uintptr(unsafe.Pointer(refdDomainNameLen)), uintptr(unsafe.Pointer(use)), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func LookupPrivilegeDisplayNameW(systemName string, privilegeName *uint16, buffer *uint16, size *uint32, languageId *uint32) (err error) {
+	var _p0 *uint16
+	_p0, err = syscall.UTF16PtrFromString(systemName)
+	if err != nil {
+		return
+	}
+	return _LookupPrivilegeDisplayNameW(_p0, privilegeName, buffer, size, languageId)
+}
+
+func _LookupPrivilegeDisplayNameW(systemName *uint16, privilegeName *uint16, buffer *uint16, size *uint32, languageId *uint32) (err error) {
+	r1, _, e1 := syscall.Syscall6(procLookupPrivilegeDisplayNameW.Addr(), 5, uintptr(unsafe.Pointer(systemName)), uintptr(unsafe.Pointer(privilegeName)), uintptr(unsafe.Pointer(buffer)), uintptr(unsafe.Pointer(size)), uintptr(unsafe.Pointer(languageId)), 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func LookupPrivilegeNameW(systemName string, luid *uint64, buffer *uint16, size *uint32) (err error) {
+	var _p0 *uint16
+	_p0, err = syscall.UTF16PtrFromString(systemName)
+	if err != nil {
+		return
+	}
+	return _LookupPrivilegeNameW(_p0, luid, buffer, size)
+}
+
+func _LookupPrivilegeNameW(systemName *uint16, luid *uint64, buffer *uint16, size *uint32) (err error) {
+	r1, _, e1 := syscall.Syscall6(procLookupPrivilegeNameW.Addr(), 4, uintptr(unsafe.Pointer(systemName)), uintptr(unsafe.Pointer(luid)), uintptr(unsafe.Pointer(buffer)), uintptr(unsafe.Pointer(size)), 0, 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
@@ -1992,6 +2059,14 @@ func ProcessIdToSessionId(pid uint32, sessionid *uint32) (err error) {
 	return
 }
 
+func PssCaptureSnapshot(processHandle windows.Handle, captureFlags uint32, threadContextFlags uint32, snapshotHandle *windows.Handle) (err error) {
+	r1, _, e1 := syscall.Syscall6(procPssCaptureSnapshot.Addr(), 4, uintptr(processHandle), uintptr(captureFlags), uintptr(threadContextFlags), uintptr(unsafe.Pointer(snapshotHandle)), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
 func PulseEvent(event Handle) (err error) {
 	r1, _, e1 := syscall.Syscall(procPulseEvent.Addr(), 1, uintptr(event), 0, 0)
 	if r1 == 0 {
@@ -2669,6 +2744,11 @@ func RtlAddFunctionTable(functionTable *RUNTIME_FUNCTION, entryCount uint32, bas
 	return
 }
 
+func RtlCopyMemory(dest uintptr, src uintptr, dwSize uint32) {
+	syscall.Syscall(procRtlCopyMemory.Addr(), 3, uintptr(dest), uintptr(src), uintptr(dwSize))
+	return
+}
+
 func RtlCreateProcessParameters(processParameters **RTL_USER_PROCESS_PARAMETERS, imagePathName *NTUnicodeString, dllPath *NTUnicodeString, currentDirectory *NTUnicodeString, commandLine *NTUnicodeString, environment *uint16, windowsTitle *NTUnicodeString, desktopInfo *NTUnicodeString, shellInfo *NTUnicodeString, runtimeData *NTUnicodeString) (ntstatus error) {
 	r0, _, _ := syscall.Syscall12(procRtlCreateProcessParameters.Addr(), 10, uintptr(unsafe.Pointer(processParameters)), uintptr(unsafe.Pointer(imagePathName)), uintptr(unsafe.Pointer(dllPath)), uintptr(unsafe.Pointer(currentDirectory)), uintptr(unsafe.Pointer(commandLine)), uintptr(unsafe.Pointer(environment)), uintptr(unsafe.Pointer(windowsTitle)), uintptr(unsafe.Pointer(desktopInfo)), uintptr(unsafe.Pointer(shellInfo)), uintptr(unsafe.Pointer(runtimeData)), 0, 0)
 	if r0 != 0 {
@@ -2844,6 +2924,14 @@ func GetModuleFileNameEx(process Handle, module Handle, filename *uint16, size u
 
 func GetModuleInformation(process Handle, module Handle, modinfo *ModuleInfo, cb uint32) (err error) {
 	r1, _, e1 := syscall.Syscall6(procGetModuleInformation.Addr(), 4, uintptr(process), uintptr(module), uintptr(unsafe.Pointer(modinfo)), uintptr(cb), 0, 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func GetProcessMemoryInfo(process windows.Handle, ppsmemCounters *ProcessMemoryCounters, cb uint32) (err error) {
+	r1, _, e1 := syscall.Syscall(procGetProcessMemoryInfo.Addr(), 3, uintptr(process), uintptr(unsafe.Pointer(ppsmemCounters)), uintptr(cb))
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}

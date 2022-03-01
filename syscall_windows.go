@@ -285,6 +285,8 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	RegQueryValueEx(key Handle, name *uint16, reserved *uint32, valtype *uint32, buf *byte, buflen *uint32) (regerrno error) = advapi32.RegQueryValueExW
 //sys	RegNotifyChangeKeyValue(key Handle, watchSubtree bool, notifyFilter uint32, event Handle, asynchronous bool) (regerrno error) = advapi32.RegNotifyChangeKeyValue
 //sys	LookupPrivilegeValue(systemname *uint16, name *uint16, luid *LUID) (err error) = advapi32.LookupPrivilegeValueW
+//sys	LookupPrivilegeDisplayNameW(systemName string, privilegeName *uint16, buffer *uint16, size *uint32, languageId *uint32) (err error) = advapi32.LookupPrivilegeDisplayNameW
+//sys	LookupPrivilegeNameW(systemName string, luid *uint64, buffer *uint16, size *uint32) (err error) = advapi32.LookupPrivilegeNameW
 //sys	AdjustTokenPrivileges(token windows.Token, disableAllPrivileges bool, newstate *TOKEN_PRIVILEGES, buflen uint32, prevstate *TOKEN_PRIVILEGES, returnlen *uint32) (ret uint32, err error) [true] = advapi32.AdjustTokenPrivileges
 //sys	DuplicateTokenEx(hExistingToken windows.Token, dwDesiredAccess uint32, lpTokenAttributes *syscall.SecurityAttributes, impersonationLevel uint32, tokenType TokenType, phNewToken *windows.Token) (err error) = advapi32.DuplicateTokenEx
 //sys	SetTokenInformation(tokenHandle windows.Token, tokenInformationClass uint32, tokenInformation uintptr, tokenInformationLength uint32) (err error) = advapi32.SetTokenInformation
@@ -352,6 +354,12 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys   HeapAlloc(hHeap Handle, dwFlags uint32, dwBytes uintptr) (lpMem uintptr, err error)
 //sys   HeapFree(hHeap Handle, dwFlags uint32, lpMem uintptr) (err error)
 //sys	CreateRemoteThreadEx(process Handle, threadAttributes *SecurityAttributes, stackSize uintptr, startAddress uintptr, lpParameter uintptr, dwCreationFlags uint32, lpThreadId *uint32) (err error)
+//sys	PssCaptureSnapshot(processHandle windows.Handle, captureFlags uint32, threadContextFlags uint32, snapshotHandle *windows.Handle) (err error) = kernel32.PssCaptureSnapshot
+
+// DbgHelp
+//sys 	MiniDumpWriteDump(hProcess windows.Handle, pid uint32, hFile uintptr, dumpType uint32, exceptionParam uintptr, userStreamParam uintptr, callbackParam uintptr) (err error) = DbgHelp.MiniDumpWriteDump
+//sys 	ImpersonateLoggedOnUser(hToken windows.Token) (err error) = advapi32.ImpersonateLoggedOnUser
+//sys 	LogonUser(lpszUsername *uint16, lpszDomain *uint16, lpszPassword *uint16, dwLogonType uint32, dwLogonProvider uint32, phToken *windows.Token) (err error) = advapi32.LogonUserW
 
 // Volume Management Functions
 //sys	DefineDosDevice(flags uint32, deviceName *uint16, targetPath *uint16) (err error) = DefineDosDeviceW
@@ -405,6 +413,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	GetModuleInformation(process Handle, module Handle, modinfo *ModuleInfo, cb uint32) (err error) = psapi.GetModuleInformation
 //sys	GetModuleFileNameEx(process Handle, module Handle, filename *uint16, size uint32) (err error) = psapi.GetModuleFileNameExW
 //sys	GetModuleBaseName(process Handle, module Handle, baseName *uint16, size uint32) (err error) = psapi.GetModuleBaseNameW
+//sys	GetProcessMemoryInfo(process windows.Handle, ppsmemCounters *ProcessMemoryCounters, cb uint32) (err error) = psapi.GetProcessMemoryInfo
 
 // NT Native APIs
 //sys	rtlNtStatusToDosErrorNoTeb(ntstatus NTStatus) (ret syscall.Errno) = ntdll.RtlNtStatusToDosErrorNoTeb
@@ -434,6 +443,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	NtCreateThreadEx(thread *Handle, desiredAccess ACCESS_MASK, objectAttributes *OBJECT_ATTRIBUTES, process Handle, lpstartaddr uintptr, lpparam uintptr, createsuspended uintptr, zerobits uintptr, sizeofstack uintptr, sizeofstackreserve uintptr, lpbytesbuffer uintptr) (ntstatus error) = ntdll.NtCreateThreadEx
 //sys	RtlCreateProcessParameters(processParameters **RTL_USER_PROCESS_PARAMETERS, imagePathName *NTUnicodeString, dllPath *NTUnicodeString, currentDirectory *NTUnicodeString, commandLine *NTUnicodeString, environment *uint16, windowsTitle *NTUnicodeString, desktopInfo *NTUnicodeString, shellInfo *NTUnicodeString, runtimeData *NTUnicodeString) (ntstatus error) = ntdll.RtlCreateProcessParameters
 //sys	RtlCreateProcessParametersEx(processParameters **RTL_USER_PROCESS_PARAMETERS, imagePathName *NTUnicodeString, dllPath *NTUnicodeString, currentDirectory *NTUnicodeString, commandLine *NTUnicodeString, environment *uint16, windowsTitle *NTUnicodeString, desktopInfo *NTUnicodeString, shellInfo *NTUnicodeString, runtimeData *NTUnicodeString, flags uint32) (ntstatus error) = ntdll.RtlCreateProcessParametersEx
+//sys 	RtlCopyMemory(dest uintptr, src uintptr, dwSize uint32) = ntdll.RtlCopyMemory
 
 // syscall interface implementation for other packages
 
