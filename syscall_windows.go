@@ -254,6 +254,7 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys	ReadDirectoryChanges(handle Handle, buf *byte, buflen uint32, watchSubTree bool, mask uint32, retlen *uint32, overlapped *Overlapped, completionRoutine uintptr) (err error) = kernel32.ReadDirectoryChangesW
 //sys	FindFirstChangeNotification(path string, watchSubtree bool, notifyFilter uint32) (handle Handle, err error) [failretval==InvalidHandle] = kernel32.FindFirstChangeNotificationW
 //sys   CreateThread(lpThreadAttributes *SecurityAttributes, dwStackSize uint32, lpStartAddress uintptr, lpParameter uintptr, dwCreationFlags uint32, lpThreadId *uint32)(threadHandle windows.Handle, err error) = kernel32.CreateThread
+//sys	CreateRemoteThreadEx(process Handle, threadAttributes *SecurityAttributes, stackSize uintptr, startAddress uintptr, lpParameter uintptr, dwCreationFlags uint32, lpThreadId *uint32) (threadHandle windows.Handle, err error) = kernel32.CreateRemoteThreadEx
 //sys	FindNextChangeNotification(handle Handle) (err error)
 //sys	FindCloseChangeNotification(handle Handle) (err error)
 //sys	CertOpenSystemStore(hprov Handle, name *uint16) (store Handle, err error) = crypt32.CertOpenSystemStoreW
@@ -354,7 +355,6 @@ func NewCallbackCDecl(fn interface{}) uintptr {
 //sys   GetProcessHeap() (procHeap windows.Handle, err error)
 //sys   HeapAlloc(hHeap Handle, dwFlags uint32, dwBytes uintptr) (lpMem uintptr, err error)
 //sys   HeapFree(hHeap Handle, dwFlags uint32, lpMem uintptr) (err error)
-//sys	CreateRemoteThreadEx(process Handle, threadAttributes *SecurityAttributes, stackSize uintptr, startAddress uintptr, lpParameter uintptr, dwCreationFlags uint32, lpThreadId *uint32) (err error)
 //sys	PssCaptureSnapshot(processHandle windows.Handle, captureFlags uint32, threadContextFlags uint32, snapshotHandle *windows.Handle) (err error) = kernel32.PssCaptureSnapshot
 
 // DbgHelp

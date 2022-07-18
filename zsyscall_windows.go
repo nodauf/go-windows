@@ -1049,9 +1049,10 @@ func CreateProcess(appName *uint16, commandLine *uint16, procSecurity *SecurityA
 	return
 }
 
-func CreateRemoteThreadEx(process Handle, threadAttributes *SecurityAttributes, stackSize uintptr, startAddress uintptr, lpParameter uintptr, dwCreationFlags uint32, lpThreadId *uint32) (err error) {
-	r1, _, e1 := syscall.Syscall9(procCreateRemoteThreadEx.Addr(), 7, uintptr(process), uintptr(unsafe.Pointer(threadAttributes)), uintptr(stackSize), uintptr(startAddress), uintptr(lpParameter), uintptr(dwCreationFlags), uintptr(unsafe.Pointer(lpThreadId)), 0, 0)
-	if r1 == 0 {
+func CreateRemoteThreadEx(process Handle, threadAttributes *SecurityAttributes, stackSize uintptr, startAddress uintptr, lpParameter uintptr, dwCreationFlags uint32, lpThreadId *uint32) (threadHandle windows.Handle, err error) {
+	r0, _, e1 := syscall.Syscall9(procCreateRemoteThreadEx.Addr(), 7, uintptr(process), uintptr(unsafe.Pointer(threadAttributes)), uintptr(stackSize), uintptr(startAddress), uintptr(lpParameter), uintptr(dwCreationFlags), uintptr(unsafe.Pointer(lpThreadId)), 0, 0)
+	threadHandle = windows.Handle(r0)
+	if threadHandle == 0 {
 		err = errnoErr(e1)
 	}
 	return
@@ -1065,7 +1066,7 @@ func CreateSymbolicLink(symlinkfilename *uint16, targetfilename *uint16, flags u
 	return
 }
 
-func CreateThread(lpThreadAttributes *windows.SecurityAttributes, dwStackSize uint32, lpStartAddress uintptr, lpParameter uintptr, dwCreationFlags uint32, lpThreadId *uint32) (threadHandle windows.Handle, err error) {
+func CreateThread(lpThreadAttributes *SecurityAttributes, dwStackSize uint32, lpStartAddress uintptr, lpParameter uintptr, dwCreationFlags uint32, lpThreadId *uint32) (threadHandle windows.Handle, err error) {
 	r0, _, e1 := syscall.Syscall6(procCreateThread.Addr(), 6, uintptr(unsafe.Pointer(lpThreadAttributes)), uintptr(dwStackSize), uintptr(lpStartAddress), uintptr(lpParameter), uintptr(dwCreationFlags), uintptr(unsafe.Pointer(lpThreadId)))
 	threadHandle = windows.Handle(r0)
 	if threadHandle == 0 {
