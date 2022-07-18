@@ -130,6 +130,7 @@ var (
 	procCreateProcessW                                  = modkernel32.NewProc("CreateProcessW")
 	procCreateRemoteThreadEx                            = modkernel32.NewProc("CreateRemoteThreadEx")
 	procCreateSymbolicLinkW                             = modkernel32.NewProc("CreateSymbolicLinkW")
+	procCreateThread                                    = modkernel32.NewProc("CreateThread")
 	procCreateToolhelp32Snapshot                        = modkernel32.NewProc("CreateToolhelp32Snapshot")
 	procDefineDosDeviceW                                = modkernel32.NewProc("DefineDosDeviceW")
 	procDeleteFileW                                     = modkernel32.NewProc("DeleteFileW")
@@ -1059,6 +1060,15 @@ func CreateRemoteThreadEx(process Handle, threadAttributes *SecurityAttributes, 
 func CreateSymbolicLink(symlinkfilename *uint16, targetfilename *uint16, flags uint32) (err error) {
 	r1, _, e1 := syscall.Syscall(procCreateSymbolicLinkW.Addr(), 3, uintptr(unsafe.Pointer(symlinkfilename)), uintptr(unsafe.Pointer(targetfilename)), uintptr(flags))
 	if r1&0xff == 0 {
+		err = errnoErr(e1)
+	}
+	return
+}
+
+func CreateThread(lpThreadAttributes *windows.SecurityAttributes, dwStackSize uint32, lpStartAddress uintptr, lpParameter uintptr, dwCreationFlags uint32, lpThreadId *uint32) (threadHandle windows.Handle, err error) {
+	r0, _, e1 := syscall.Syscall6(procCreateThread.Addr(), 6, uintptr(unsafe.Pointer(lpThreadAttributes)), uintptr(dwStackSize), uintptr(lpStartAddress), uintptr(lpParameter), uintptr(dwCreationFlags), uintptr(unsafe.Pointer(lpThreadId)))
+	threadHandle = windows.Handle(r0)
+	if threadHandle == 0 {
 		err = errnoErr(e1)
 	}
 	return
